@@ -74,9 +74,9 @@ public:
 					ice[x][y] = new Ice(6, x, y, dirRight, 0.25, 3);
 				}
 			};
-			if (x == 62) { // object list fills at  x =63 y = 1 for some reason
-				int f = 7;
-			}
+			//if (x == 62) { // object list fills at  x =63 y = 1 for some reason
+			//	int f = 7;
+			//}
 		};
 
 		// Generate a random spot on the map, as long as the spot isnt within 6 squares of anything that isnt an ice object, place the object
@@ -89,7 +89,7 @@ public:
 		while (bouldersPlaced != boulders) {
 			randomValidLocation(xPos, yPos);
 			Boulder* boulder = new Boulder(4, xPos, yPos, dirRight, 1, 1);
-			objectList.push_back(boulder);
+			//objectList.push_back(boulder);
 			//bigRocks[boulderTracker] = new Boulder(4, xPos, yPos, dirDown, 1, 1);
 			bouldersPlaced++;
 		}
@@ -99,7 +99,7 @@ public:
 		while (oilPlaced != barrels) {
 			randomValidLocation(xPos, yPos);
 			Oil *oilBarrel = new Oil(5, xPos, yPos, dirRight, 1, 2);
-			objectList.push_back(oilBarrel);
+			//objectList.push_back(oilBarrel);
 			oilBarrel->setVisible(true);
 			//ice[xPos][yPos] = new Oil(5, xPos, yPos, dirRight, 1, 2);
 			//bigRocks[boulderTracker] = new Oil(4, xPos, yPos, dirDown, 1, 1);
@@ -111,7 +111,7 @@ public:
 		while (goldPlaced != golds) {
 			randomValidLocation(xPos, yPos);
 			Gold* goldNugget = new Gold(7, xPos, yPos, dirRight, 1, 2);
-			objectList.push_back(goldNugget);
+			//objectList.push_back(goldNugget);
 			goldNugget->setVisible(true);
 			//bigRocks[boulderTracker] = new Gold(4, xPos, yPos, dirDown, 1, 1);
 			goldPlaced++;
@@ -153,7 +153,7 @@ public:
 		//	return GWSTATUS_FINISHED_LEVEL;
 		//}
 
-		return GWSTATUS_CONTINUE_GAME; 	// the player hasn’t completed the current level and hasn’t died, let them continue playing the current level
+		return GWSTATUS_CONTINUE_GAME; 	// the player hasnâ€™t completed the current level and hasnâ€™t died, let them continue playing the current level
 
 	}
 	virtual void cleanUp()
@@ -212,9 +212,9 @@ public:
 				for (int yCheck = yPosition - 6; yCheck < yPosition + 6; yCheck++) {		// check +/- 6 y squares
 					for (int xCheck = xPosition - 6; xCheck < xPosition + 6; xCheck++) { // check +/- 6 x squares
 						if (xCheck >= 0 && yCheck >= 0) {
-							if (objectList[i]->getX() == xCheck && objectList[i]->getY() == yCheck) {
-								safeSpot = false;
-							}
+							//if (objectList[i]->getX() == xCheck && objectList[i]->getY() == yCheck) {
+							//	safeSpot = false;
+							//}
 						}
 					}
 				}
