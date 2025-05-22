@@ -4,65 +4,43 @@
 #include "GraphObject.h"
 #include "GameConstants.h"
 #include "GameWorld.h"
+#include "GameController.h"
+
+
+class StudentWorld;
 
 class Actor : public GraphObject
 {
 public:
+    Actor(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
+    virtual ~Actor();
 
-	Actor(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0)
-		: GraphObject(imageID, startX, startY, startDirection, size, depth)
-	{
-		setDirection(startDirection);
-		moveTo(startX, startY);
-		this->setVisible(true);
-	}
-	~Actor()
-	{
-		
-	}
-	void doSomething()
-	{
+    virtual void doSomething();
 
-	}
+    unsigned int getIDNum() const;
 
-	unsigned int getIDNum() const
-	{
-		return imageIDNum;
-	}
-	void setIDNum(int numID)
-	{
-		imageIDNum = numID;
-	}
-	unsigned int getHealth() const
-	{
-		return health;
-	}
-	void setHealth(int healthAmt)
-	{
-		health = healthAmt;
-	}
+    void setIDNum(int numID);
+
+    unsigned int getHealth() const;
+
+    void setHealth(int healthAmt);
+
+	StudentWorld* getStudentWorld() const; // Return pointer to StudentWorld
+
 private:
-	int imageIDNum = 0;
-	int health = 0;
+	StudentWorld* studentWorld; // pointer to StudentWorld
+    int imageIDNum = 0;
+    int health = 0;
 };
 
 class Ice : public Actor
 {
 public:
-	Ice(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0)
-		: Actor(imageID, startX, startY, startDirection, size, depth)
-	{
-		setIDNum(imageID);
-		this->setVisible(true);
-	}
-	~Ice()
-	{
-		
-	}
-	void doSomething()
-	{
+    Ice(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
 
-	}
+	~Ice();
+
+    void doSomething();
 
 private:
 
@@ -71,45 +49,26 @@ private:
 class iceMan : public Actor
 {
 public:
-	iceMan(int imageID, int startX, int startY, Direction startDirection, float size = 1.0f, unsigned int depth = 0)
-		: Actor(imageID, startX, startY, startDirection, size, depth)
-	{
-		setIDNum(imageID);
-		moveTo(30, 60);
-		setHealth(10);
-		moveTo(startX, startY);
-		this->setVisible(true);
-	}
-	~iceMan()
-	{
-		
-	}
-	void doSomething()
-	{
+    iceMan(int imageID, int startX, int startY, Direction startDirection, float size = 1.0f, unsigned int depth = 0);
 
-	}
+	~iceMan();
+
+	void doSomething();
+
 private:
 	int waterUnits = 0;
 	int sonarUnits = 0;
+
 };
 
 class Oil : public Actor
 {
 public:
-	Oil(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0)
-		: Actor(imageID, startX, startY, startDirection, size, depth)
-	{
-		setIDNum(imageID);
-		//this->setVisible(true);
-	}
-	~Oil()
-	{
-		
-	}
-	void doSomething()
-	{
+    Oil(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
 
-	}
+    ~Oil();
+
+	void doSomething();
 
 private:
 
@@ -118,66 +77,45 @@ private:
 class Gold : public Actor
 {
 public:
-	Gold(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0)
-		: Actor(imageID, startX, startY, startDirection, size, depth)
-	{
-		setIDNum(imageID);
-		//this->setVisible(true);
-	}
-	~Gold()
-	{
-		
-	}
-	void doSomething()
-	{
+    Gold(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
 
-	}
+    ~Gold();
+
+	void doSomething();
 
 private:
 
 };
+
 class Boulder : public Actor
 {
 public:
-	Boulder(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 1)
-		: Actor(imageID, startX, startY, startDirection, size, depth)
-	{
-		setIDNum(imageID);
-		setHealth(1000000);
-		this->setVisible(true);
-	}
-	~Boulder()
-	{
-		
-	}
-	void doSomething()
-	{
-		if (getHealth() == 0) {
-			return;
-		}
-		int xPos = getX();
-		int yPos = getY();
 
-		if (stability == true) {
-			for (int i = yPos - 4; i < yPos; i++) {
-				
-			}
-		}
-		if (waiting = true) {
-			if (waitTimer == 30) {
-				//GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
-				moveTo(xPos, yPos - 1);
-			}
-			else {
-				waitTimer++;
-			}
-		}
-	}
+
+	Boulder(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 1);
+
+	~Boulder();
+
+	void doSomething();
+
+	void setStability(bool setting);
+
+
+	bool  getStability();
+
+	void setWaiting(bool setting);
+
+	bool  getWaiting();
+
+	void incrementWaitTimer();
 
 private:
-	bool stability = true;
-	bool waiting = false;
+
+	bool stable;
+	bool waiting;
 	int waitTimer = 0;
 
 };
+
 #endif // ACTOR_H_
+
