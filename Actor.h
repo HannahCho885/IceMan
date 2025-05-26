@@ -27,10 +27,13 @@ public:
 
 	StudentWorld* getStudentWorld() const; // Return pointer to StudentWorld
 
+	//Actor(StudentWorld* owner) : StudentWorld(owner);
+
 private:
 	StudentWorld* studentWorld; // pointer to StudentWorld
     int imageIDNum = 0;
     int health = 0;
+
 };
 
 class Ice : public Actor
@@ -84,7 +87,8 @@ public:
 	void doSomething();
 
 private:
-
+	bool tempGold = false;
+	int tick = 30;
 };
 
 class Boulder : public Actor

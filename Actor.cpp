@@ -13,6 +13,7 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, floa
 	setDirection(startDirection);
 	moveTo(startX, startY);
 	this->setVisible(true);
+    studentWorld = getStudentWorld();
 }
 
 Actor::~Actor() {}
@@ -70,7 +71,7 @@ void iceMan::doSomething(){
 Oil::Oil(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
 	: Actor(imageID, startX, startY, startDirection, size, depth){
 	setIDNum(imageID);
-	this->setVisible(true);
+	this->setVisible(false);
 }
 
 Oil::~Oil(){
@@ -78,14 +79,26 @@ Oil::~Oil(){
 }
 
 void Oil::doSomething(){
-	
+    if (this->getHealth() > 0) {    // If object not dead
+        if (this->isVisible() == false) { // if oil is not visible and <= 4 units away from player
+            this->isVisible() == true;
+            return;
+        }
+        else if (1 == 1) { // if oil is <= 3 units away from player
+            this->setHealth(0); // prep for object death
+            GameController::getInstance().playSound(SOUND_FOUND_OIL);   // play sound
+            getStudentWorld()->increaseScore(1000); // Increase score by 1000 points
+            getStudentWorld()->incrementOil();// Inform the StudentWorld object that it was picked up
+        }
+    }
+
 }
 
 Gold::Gold(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
 	: Actor(imageID, startX, startY, startDirection, size, depth)
 {
 	setIDNum(imageID);
-	this->setVisible(true); 
+	this->setVisible(false); 
 }
 
 Gold::~Gold(){
@@ -93,7 +106,26 @@ Gold::~Gold(){
 }
 
 void Gold::doSomething(){
-
+    if (this->getHealth() > 0) {
+        if (this->isVisible() == false) { // if oil is not visible and <= 4 units away from player
+            this->isVisible() == true;
+            return;
+        }
+        else if (1 == 1) { // if oil is <= 3 units away from player
+            this->setHealth(0); // prep for object death
+            GameController::getInstance().playSound(SOUND_GOT_GOODIE);   // play sound
+            getStudentWorld()->increaseScore(10); // Increase score by 10 points
+            getStudentWorld()->incrementGold();// Inform the StudentWorld object that it was picked up
+        }
+    }
+    if (tempGold == true) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
+        if (tick == 30) {
+            this->setHealth(0);
+        }
+        else {
+            tick--;
+        }
+    }
 }
 
 Boulder::Boulder(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
@@ -118,10 +150,14 @@ void Boulder::doSomething()
 
     int xPos = getX();
     int yPos = getY();
+    Ice* ice;    // temp ice holder
 
     if (waiting == false) { // check for stability
-        for (int i = yPos; i > (yPos - 4); i--) { // check each ice spot 4 squares below boulder y position
-            getStudentWorld()->getIceField();
+        for (int i = yPos-1; i > (yPos - 5); i--) { // check each ice spot 4 squares below boulder y position
+            //if(getStudentWorld()->getIceField(xPos, yPos) == nullptr) {
+            //    waiting = true;
+            //}
+
         }
     }
 

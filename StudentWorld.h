@@ -13,7 +13,7 @@
 #include <utility> // for std::pair
 #include <random>    // for std::default_random_engine
 using namespace std;
-
+class Actor;
 
 class StudentWorld : public GameWorld
 {
@@ -51,9 +51,13 @@ public:
 
 	void randomValidLocation(int& x, int& y);
 
+	void incrementOil();
+
+	void incrementGold();
+
 	iceMan* getPlayer();
 
-	Ice* getIceField();
+	Ice* getIceField(int x, int y);
 
 	vector<Actor*> getObjectList();
 };

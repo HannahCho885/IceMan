@@ -130,6 +130,9 @@ int StudentWorld::move(){
 
 }
 void StudentWorld:: cleanUp(){
+	delete player;
+	std::vector<Actor*>().swap(objectList);  // Replaces with an empty vector and frees memory
+	delete ice;
 }
 
 void StudentWorld::updateScore(){
@@ -200,10 +203,19 @@ iceMan* StudentWorld::getPlayer() {
 	return player;
 }
 
-Ice* StudentWorld:: getIceField() {
-	return ice[64][60];
+Ice* StudentWorld:: getIceField(int x, int y) {
+	return ice[x][y];
 }
+
 
 vector<Actor*> StudentWorld:: getObjectList() {
 	return objectList;
+}
+
+void StudentWorld::incrementOil() {
+	oilBarrelsCollected++;
+}
+
+void StudentWorld::incrementGold() {
+	goldNuggetsCollected++;
 }
