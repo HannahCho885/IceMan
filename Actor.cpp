@@ -18,7 +18,8 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, floa
 
 Actor::~Actor() {}
 
-void Actor::doSomething() {}
+void Actor::doSomething() {
+}
 
 unsigned int Actor::getIDNum() const {
 	return imageIDNum;
@@ -84,14 +85,13 @@ void Oil::doSomething(){
             this->isVisible() == true;
             return;
         }
-        else if (1 == 1) { // if oil is <= 3 units away from player
+        else if (abs(getStudentWorld()->getPlayer()->getX() - getX()) <= 3 || abs(getStudentWorld()->getPlayer()->getY() - getY() <= 3)) { // if oil is <= 3 units away from player
             this->setHealth(0); // prep for object death
             GameController::getInstance().playSound(SOUND_FOUND_OIL);   // play sound
             getStudentWorld()->increaseScore(1000); // Increase score by 1000 points
             getStudentWorld()->incrementOil();// Inform the StudentWorld object that it was picked up
         }
     }
-
 }
 
 Gold::Gold(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
@@ -111,7 +111,7 @@ void Gold::doSomething(){
             this->isVisible() == true;
             return;
         }
-        else if (1 == 1) { // if oil is <= 3 units away from player
+        else if (abs(getStudentWorld()->getPlayer()->getX() - getX()) <= 3 || abs(getStudentWorld()->getPlayer()->getY() - getY() <= 3)) { // if oil is <= 3 units away from player
             this->setHealth(0); // prep for object death
             GameController::getInstance().playSound(SOUND_GOT_GOODIE);   // play sound
             getStudentWorld()->increaseScore(10); // Increase score by 10 points
@@ -150,21 +150,30 @@ void Boulder::doSomething()
 
     int xPos = getX();
     int yPos = getY();
-    Ice* ice;    // temp ice holder
 
     if (waiting == false) { // check for stability
-        for (int i = yPos-1; i > (yPos - 5); i--) { // check each ice spot 4 squares below boulder y position
-            //if(getStudentWorld()->getIceField(xPos, yPos) == nullptr) {
-            //    waiting = true;
-            //}
-
+        for (int i = xPos; i > (xPos + 4); i++) { // check each 4 x-coordinate ice spots below boulder's y position
+            if(getStudentWorld()->getIceField(i, yPos-1) == nullptr) {
+                waiting = true;
+            }
         }
     }
 
     if (waiting == true) {
-        if (waitTimer == 30) {
-            GameController::getInstance().playSound(SOUND_FALLING_ROCK);  // Pplay sound when falling
-            moveTo(xPos, yPos - 1);  // move Boulder one square down
+        if (waitTimer >= 30) {
+            if (waitTimer == 30) { // only play the sound once
+                GameController::getInstance().playSound(SOUND_FALLING_ROCK);  // Pplay sound when falling
+                waiting = true;
+            }
+            if (getStudentWorld()->getIceField(xPos, yPos-1) != nullptr || yPos == 0) { // If the spot below boulder is an object or the bottom of map
+                setHealth(0);   // kill boulder
+                waitTimer = 0;
+                waiting = false;
+            }
+            else {
+                moveTo(xPos, yPos - 1);  // move Boulder one square down
+            }
+
         }
         else {
             waitTimer++;
@@ -195,6 +204,10 @@ bool Boulder::getWaiting()
 void Boulder::incrementWaitTimer()
 {
     waitTimer++;
+}
+
+void Actor::setStudentWorld(StudentWorld* inputStudentWorld) {
+    studentWorld = inputStudentWorld;
 }
 
 #endif // ACTOR_CPP_

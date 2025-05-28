@@ -13,6 +13,7 @@ class Actor : public GraphObject
 {
 public:
     Actor(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
+
     virtual ~Actor();
 
     virtual void doSomething();
@@ -26,13 +27,14 @@ public:
     void setHealth(int healthAmt);
 
 	StudentWorld* getStudentWorld() const; // Return pointer to StudentWorld
-
-	//Actor(StudentWorld* owner) : StudentWorld(owner);
+	
+	void setStudentWorld(StudentWorld* studentWorld);
 
 private:
-	StudentWorld* studentWorld; // pointer to StudentWorld
+	StudentWorld* studentWorld = nullptr; // pointer to StudentWorld
     int imageIDNum = 0;
     int health = 0;
+	int annoyance = 0;
 
 };
 

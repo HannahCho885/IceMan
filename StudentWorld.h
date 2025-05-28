@@ -28,9 +28,9 @@ private:
 	int sonar = 0;
 	int level = 0;
 	int boulders = 0;
-	int goldNuggets = 0;
+	int numGoldNuggets = 0;
 	int goldNuggetsCollected = 0;
-	int oilBarrels = 0;
+	int numOilBarrels = 0;
 	int oilBarrelsCollected = 0;
 	iceMan* player;
 	Ice* ice[64][60];

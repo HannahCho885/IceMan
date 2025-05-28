@@ -9,19 +9,20 @@ GameWorld* createStudentWorld(string assetDir)
 StudentWorld::StudentWorld(std::string assetDir) : GameWorld(assetDir){
 }
 int StudentWorld::init(){
-	// generate a signed int, then make a tracker (requires a signed integer eg. no math in assignment operator)
+	// generate a signed int for how many of each to spawn (requires a signed integer eg. no math in assignment operator)
 	int boulders = getLevel() / 2 + 2;
 	int golds = 5 - getLevel() / 2;
 	int barrels = 2 + getLevel();
 	boulders = std::min(boulders, 9);
-	golds = std::max(golds, 2);
-	barrels = std::min(barrels, 21);
+	numGoldNuggets = std::max(golds, 2);
+	numOilBarrels = std::min(barrels, 21);
 
 	GraphObject::Direction dirLeft = GraphObject::Direction::left; // direction player will start off facing
 	GraphObject::Direction dirRight = GraphObject::Direction::right; // direction ice will start off facing
 	GraphObject::Direction dirDown = GraphObject::Direction::down; // direction boulder will start off facing
 	GraphObject::Direction dirUp = GraphObject::Direction::up;
 	player = new iceMan(0, 30, 60, dirLeft, 1.0, 0);	// generate new player object
+	player->setStudentWorld(this);
 
 	for (int x = 0; x <= 63; x++) // generate new map of ice
 	{
@@ -49,6 +50,7 @@ int StudentWorld::init(){
 			randomValidLocation(xPos, yPos); //  reroll boulder position if necessary 
 		}
 		Boulder* boulder = new Boulder(4, xPos, yPos, dirRight, 1, 1); // Boulder builds from the bottom left corner of the boulder
+		boulder->setStudentWorld(this);
 		
 		// clear out the 4 x 4 ice beneath the boulder
 		for (int i = yPos; i < (yPos + 4); i++) {
@@ -56,26 +58,26 @@ int StudentWorld::init(){
 				delete ice[n][i];
 			}
 		}
-		
 		objectList.push_back(boulder);	// push object to object list
-
 		bouldersPlaced++;
 	}
 
 	// place oil barrels on the map
 	int oilPlaced = 0;		// places boulders vs number of boulders that should be on the map
-	while (oilPlaced != barrels) {
+	while (oilPlaced != numOilBarrels) {
 		randomValidLocation(xPos, yPos);
 		Oil* oilBarrel = new Oil(5, xPos, yPos, dirRight, 1, 2);
+		oilBarrel->setStudentWorld(this);
 		objectList.push_back(oilBarrel);	// push object to object list
 		oilPlaced++;
 	}
 
 	// place gold nuggets on the map
 	int goldPlaced = 0;		// places boulders vs number of boulders that should be on the map
-	while (goldPlaced != golds) {
+	while (goldPlaced != numGoldNuggets) {
 		randomValidLocation(xPos, yPos);
 		Gold* goldNugget = new Gold(7, xPos, yPos, dirRight, 1, 2);
+		goldNugget->setStudentWorld(this);
 		objectList.push_back(goldNugget);	// push object to object list
 		goldPlaced++;
 	}
@@ -83,22 +85,15 @@ int StudentWorld::init(){
 	updateScore(); // ouput scoreboard
 	setGameStatText(gameStats);
 	return GWSTATUS_CONTINUE_GAME;
+
 }
 
 int StudentWorld::move(){
 	for (int i = 0; i < objectList.size(); i++) { // move for all the static objects
-		switch (objectList[i]->getID()) { // do something depending on which object it is
-		case 4: // boulder objects
-			objectList[i]->doSomething();
-			break;
-		case 5:	// oil barrel objects
-			objectList[i]->doSomething();
-			break;
-		case 7: // gold nugget objects
-			objectList[i]->doSomething();
-			break;
-		}
+		objectList[i]->doSomething();
 	}
+	player->doSomething();
+
 	//for each of the actors in the game world{
 	//	if (actor[i] is still active / alive){
 	//		ask each actor to do something (e.g. move) 
@@ -121,18 +116,24 @@ int StudentWorld::move(){
 	}
 
 	//if the player has collected all of the Barrels on the level, then return the result that the player finished the level
-	//if (oilBarrels == oilBarrelsCollected) {
-	//	GameController::getInstance().playSound(GWSTATUS_FINISHED_LEVEL);
-	//	return GWSTATUS_FINISHED_LEVEL;
-	//}
-
+	if (numOilBarrels == oilBarrelsCollected) {
+		GameController::getInstance().playSound(GWSTATUS_FINISHED_LEVEL);
+		return GWSTATUS_FINISHED_LEVEL;
+	}
+	//return GWSTATUS_PLAYER_DIED;
 	return GWSTATUS_CONTINUE_GAME; 	// the player hasn’t completed the current level and hasn’t died, let them continue playing the current level
 
 }
 void StudentWorld:: cleanUp(){
-	delete player;
-	std::vector<Actor*>().swap(objectList);  // Replaces with an empty vector and frees memory
-	delete ice;
+	//for (int i = 0; i < 64; i++) {
+	//	for (int j = 0; j < 60; j++) {
+	//		if (ice[i][j] != nullptr) {
+	//			delete ice[i][j];
+	//		}
+	//	}
+	//}
+	//delete player;
+	//std::vector<Actor*>().swap(objectList);  // Replaces with an empty vector and frees memory
 }
 
 void StudentWorld::updateScore(){
