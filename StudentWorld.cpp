@@ -1,5 +1,6 @@
 #include "StudentWorld.h"
 #include <string>
+#include <stdexcept>
 using namespace std;
 
 GameWorld* createStudentWorld(string assetDir)
@@ -24,6 +25,11 @@ int StudentWorld::init(){
 	player = new iceMan(0, 30, 60, dirLeft, 1.0, 0);	// generate new player object
 	player->setStudentWorld(this);
 
+	for (int i = 0; i < 64; i++) { 	// initialize the ice map to nullptr to prevent read errors
+		for (int j = 0; j < 60; j++) {
+			ice[i][j] = nullptr;
+		}
+	}
 	for (int x = 0; x <= 63; x++) // generate new map of ice
 	{
 		for (int y = 0; y <= 59; y++)
@@ -55,7 +61,10 @@ int StudentWorld::init(){
 		// clear out the 4 x 4 ice beneath the boulder
 		for (int i = yPos; i < (yPos + 4); i++) {
 			for (int n = xPos; n < (xPos + 4); n++) {
-				delete ice[n][i];
+				if (ice[n][i] != nullptr) {
+					delete ice[n][i];
+					ice[n][i] = nullptr;
+				}
 			}
 		}
 		objectList.push_back(boulder);	// push object to object list
@@ -82,6 +91,8 @@ int StudentWorld::init(){
 		goldPlaced++;
 	}
 
+	goodieChance = getLevel() *30 + 290; // 1 in goodieChance chance for a Water Pool or Sonar Kit 
+
 	updateScore(); // ouput scoreboard
 	setGameStatText(gameStats);
 	return GWSTATUS_CONTINUE_GAME;
@@ -89,10 +100,10 @@ int StudentWorld::init(){
 }
 
 int StudentWorld::move(){
+	player->doSomething();
 	for (int i = 0; i < objectList.size(); i++) { // move for all the static objects
 		objectList[i]->doSomething();
 	}
-	player->doSomething();
 
 	//for each of the actors in the game world{
 	//	if (actor[i] is still active / alive){
@@ -109,31 +120,43 @@ int StudentWorld::move(){
 
 
 	updateScore(); // update the score/lives/level text at top of screen
-	//removeDeadGameObjects(); // delete dead game objects return the proper result
+
+	//for (int i = 0; i < objectList.size(); i++) { // delete dead game objects
+	//	if (objectList[i]->getHealth() == 0) {
+	//		delete objectList[i];
+	//	}
+	//}
 
 	if (player->getHealth() == 0) {	// check for player death
+		decLives();
 		return GWSTATUS_PLAYER_DIED;
 	}
 
 	//if the player has collected all of the Barrels on the level, then return the result that the player finished the level
 	if (numOilBarrels == oilBarrelsCollected) {
 		GameController::getInstance().playSound(GWSTATUS_FINISHED_LEVEL);
+		advanceToNextLevel();
 		return GWSTATUS_FINISHED_LEVEL;
 	}
+
+	//decLives();
 	//return GWSTATUS_PLAYER_DIED;
 	return GWSTATUS_CONTINUE_GAME; 	// the player hasn’t completed the current level and hasn’t died, let them continue playing the current level
 
 }
 void StudentWorld:: cleanUp(){
-	//for (int i = 0; i < 64; i++) {
-	//	for (int j = 0; j < 60; j++) {
-	//		if (ice[i][j] != nullptr) {
-	//			delete ice[i][j];
-	//		}
-	//	}
-	//}
-	//delete player;
-	//std::vector<Actor*>().swap(objectList);  // Replaces with an empty vector and frees memory
+	for (int i = 0; i < 64; i++) {
+		for (int j = 0; j < 60; j++) {
+			if (ice[i][j] != nullptr) {
+				delete ice[i][j];
+			}
+		}
+	}
+	delete[] player;
+	for (Actor* actor : objectList) { // clears out objectList
+		delete actor;
+	}
+	objectList.clear();
 }
 
 void StudentWorld::updateScore(){
@@ -200,6 +223,23 @@ void StudentWorld::randomValidLocation(int& x, int& y) {
 	y = yPosition;
 	x = xPosition;
 }
+
+StudentWorld:: ~StudentWorld() {	// Destructor (copy of cleanUp())
+	for (int i = 0; i < 64; i++) {
+		for (int j = 0; j < 60; j++) {
+			if (ice[i][j] != nullptr) {
+				delete ice[i][j];
+			}
+		}
+	}
+	delete[] player;	// dlete player IceMan from memory
+
+	for (Actor* actor : objectList) { // clears out objectList from memory
+		delete[] actor;
+	}
+	objectList.clear();
+}
+
 iceMan* StudentWorld::getPlayer() {
 	return player;
 }

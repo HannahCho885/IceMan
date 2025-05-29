@@ -19,6 +19,7 @@ class StudentWorld : public GameWorld
 {
 private:
 	std::string gameStats = "";
+	int goodieChance = 0;
 	int lives = 0;
 	int health = 0;
 	int water = 0;
@@ -34,12 +35,15 @@ private:
 	int oilBarrelsCollected = 0;
 	iceMan* player;
 	Ice* ice[64][60];
+	//Actor* map[64][60];
 	vector<Actor*> objectList;
 	
 
 public:
 
 	StudentWorld(std::string assetDir);
+
+	~StudentWorld();
 
 	virtual int init();
 

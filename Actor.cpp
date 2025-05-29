@@ -16,7 +16,8 @@ Actor::Actor(int imageID, int startX, int startY, Direction startDirection, floa
     studentWorld = getStudentWorld();
 }
 
-Actor::~Actor() {}
+Actor::~Actor() {
+}
 
 void Actor::doSomething() {
 }
