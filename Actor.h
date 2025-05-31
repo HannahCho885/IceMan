@@ -60,6 +60,14 @@ public:
 
 	void doSomething();
 
+	int getWaterUnits();
+
+	int getSonarUnits();
+
+	void addWater();
+
+	void addSonar();
+
 private:
 	int waterUnits = 0;
 	int sonarUnits = 0;
@@ -76,7 +84,8 @@ public:
 	void doSomething();
 
 private:
-
+	int tick = 0;
+	
 };
 
 class Gold : public Actor
@@ -90,7 +99,7 @@ public:
 
 private:
 	bool tempGold = false;
-	int tick = 30;
+	int tick = 0;
 };
 
 class Boulder : public Actor
@@ -120,7 +129,36 @@ private:
 	bool stable;
 	bool waiting;
 	int waitTimer = 0;
+	int tick = 0;
 
+};
+
+class Sonar : public Actor
+{
+public:
+	Sonar(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
+
+	~Sonar();
+
+	void doSomething();
+
+private:
+	int tick = 0;
+	int maxNumSonar = 0;
+};
+
+class Water : public Actor
+{
+public:
+	Water(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
+
+	~Water();
+
+	void doSomething();
+
+private:
+	int tick = 0;
+	int maxNumWater = 0;
 };
 
 #endif // ACTOR_H_

@@ -105,6 +105,8 @@ int StudentWorld::move(){
 		objectList[i]->doSomething();
 	}
 
+	int check;
+	GameWorld::getKey(check);
 	//for each of the actors in the game world{
 	//	if (actor[i] is still active / alive){
 	//		ask each actor to do something (e.g. move) 
@@ -160,19 +162,15 @@ void StudentWorld:: cleanUp(){
 }
 
 void StudentWorld::updateScore(){
-	lives = getLives();
-	score = getScore();
-	level = getLevel();
-	score = getScore();
 	//Lvl: 52 Lives: 3 Hlth: 80% Wtr: 20 Gld: 3 Oil Left: 2 Sonar: 1 Scr: 321000
-	gameStats = "Lvl: " + std::to_string(level);
-	gameStats += " Lives: " + std::to_string(lives);
-	gameStats += " Hlth: " + std::to_string(health);
-	gameStats += " % Wtr : " + std::to_string(water);
-	gameStats += " Gld: " + std::to_string(gold);
-	gameStats += " Oil Left: " + std::to_string(oil);
-	gameStats += " Sonar: " + std::to_string(sonar);
-	gameStats += " Scr: " + std::to_string(score);
+	gameStats = "Lvl: " + std::to_string(getLevel());
+	gameStats += "  Lives: " + std::to_string(getLives());
+	gameStats += "  Hlth: " + std::to_string(player->getHealth());	// note: set to % instead of raw amount
+	gameStats += "%  Wtr: " + std::to_string(player->getWaterUnits());
+	gameStats += "  Gld: " + std::to_string(goldNuggetsCollected);
+	gameStats += "  Oil Left: " + std::to_string(numOilBarrels - oilBarrelsCollected);
+	gameStats += "  Sonar: " + std::to_string(player->getSonarUnits());
+	gameStats += "  Scr: " + std::to_string(getScore());
 }
 
 // generate a random spot on the map, as long as the spot isnt within 6 squares of anything that isnt an ice object
@@ -181,6 +179,7 @@ void StudentWorld::randomValidLocation(int& x, int& y) {
 	bool safeSpot = false;
 	int yPosition = 0;
 	int xPosition = 0;
+
 
 	while (safeSpot == false) {		//while the spot to place isnt safe, repeat this loop until safe spot is found
 
@@ -248,6 +247,9 @@ Ice* StudentWorld:: getIceField(int x, int y) {
 	return ice[x][y];
 }
 
+void StudentWorld::setIceField(int x, int y, Ice* temp){
+	ice[x][y] = temp;
+}
 
 vector<Actor*> StudentWorld:: getObjectList() {
 	return objectList;

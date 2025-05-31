@@ -20,14 +20,7 @@ class StudentWorld : public GameWorld
 private:
 	std::string gameStats = "";
 	int goodieChance = 0;
-	int lives = 0;
-	int health = 0;
-	int water = 0;
-	int oil = 0;
 	int gold = 0;
-	int score = 0;
-	int sonar = 0;
-	int level = 0;
 	int boulders = 0;
 	int numGoldNuggets = 0;
 	int goldNuggetsCollected = 0;
@@ -35,7 +28,6 @@ private:
 	int oilBarrelsCollected = 0;
 	iceMan* player;
 	Ice* ice[64][60];
-	//Actor* map[64][60];
 	vector<Actor*> objectList;
 	
 
@@ -62,6 +54,8 @@ public:
 	iceMan* getPlayer();
 
 	Ice* getIceField(int x, int y);
+
+	void setIceField(int x, int y, Ice* temp);
 
 	vector<Actor*> getObjectList();
 };
