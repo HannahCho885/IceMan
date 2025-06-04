@@ -82,6 +82,7 @@ void iceMan::doSomething() {
 								delete getStudentWorld()->getIceField(i, j);
 								getStudentWorld()->setIceField(i, j, nullptr);
 							}
+
 						}
 					}
 				}

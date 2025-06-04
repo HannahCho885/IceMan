@@ -127,6 +127,7 @@ int StudentWorld::move(){
 	//	if (objectList[i]->getHealth() == 0) {
 	//		delete objectList[i];
 	//		objectList[i] = nullptr;
+
 	//	}
 	//}
 
@@ -144,7 +145,7 @@ int StudentWorld::move(){
 
 	//decLives();
 	//return GWSTATUS_PLAYER_DIED;
-	return GWSTATUS_CONTINUE_GAME; 	// the player hasn’t completed the current level and hasn’t died, let them continue playing the current level
+	return GWSTATUS_CONTINUE_GAME; 	// the player hasnâ€™t completed the current level and hasnâ€™t died, let them continue playing the current level
 
 }
 void StudentWorld:: cleanUp(){
@@ -280,4 +281,5 @@ bool StudentWorld::checkCollision(int x, int y, Actor* object) {	// check for co
 		return true;
 	}
 	return false;
+
 }

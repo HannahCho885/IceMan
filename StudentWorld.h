@@ -60,6 +60,7 @@ public:
 	vector<Actor*> getObjectList();
 
 	bool checkCollision(int x, int y, Actor* object);
+
 };
 
 #endif // STUDENTWORLD_H_
