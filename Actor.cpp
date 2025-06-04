@@ -72,7 +72,7 @@ void iceMan::doSomething() {
 		switch (ch) {
 		case KEY_PRESS_LEFT:
 			if (left != getDirection()) { setDirection(left); }
-			if (getX() - 1 == 0) { break; }
+			if (getX() - 1 < 0) { break; }
 			else {
 				moveTo(getX() - 1, getY());
 				for (int i = getX(); i < getX() + 4; i++) {
@@ -89,7 +89,7 @@ void iceMan::doSomething() {
 			break;
 		case KEY_PRESS_RIGHT:
 			if (right != getDirection()) { setDirection(right); }
-			if (getX() + 1 == 60) { break; }
+			if (getX() + 4 == 64) { break; }
 			else {
 				moveTo(getX() + 1, getY());
 				for (int i = getX(); i < getX() + 4; i++) {
@@ -123,7 +123,7 @@ void iceMan::doSomething() {
 			break;
 		case KEY_PRESS_DOWN:
 			if (down != getDirection()) { setDirection(down); }
-			if (getY() - 1 == 0) { break; }
+			if (getY() - 1 < 0) { break; }
 			else {
 				moveTo(getX(), getY() - 1);
 				for (int i = getX(); i < getX() + 4; i++) {
@@ -242,10 +242,9 @@ void Boulder::doSomething()
 	int yPos = getY();
 
 	if (waiting == false) { // check for stability
-		for (int i = xPos; i > (xPos + 4); i++) { // check each 4 x-coordinate ice spots below boulder's y position
-			if (getStudentWorld()->getIceField(i, yPos - 1) == nullptr) {
-				waiting = true;
-			}
+		// check each 4 x-coordinate ice spots below boulder's y position
+		if (getStudentWorld()->getIceField(xPos, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 1, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 2, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 3, yPos - 1) == nullptr) { 
+			waiting = true;	// all 4 places below the boulder are empty, start the falling countdown
 		}
 	}
 
@@ -253,7 +252,6 @@ void Boulder::doSomething()
 		if (waitTimer >= 30) {
 			if (waitTimer == 30) { // only play the sound once
 				GameController::getInstance().playSound(SOUND_FALLING_ROCK);  // play sound when falling
-				waiting = true;
 			}
 			if (getStudentWorld()->getIceField(xPos, yPos - 1) != nullptr || yPos == 0) { // if the spot below boulder is an object or the bottom of map
 				setHealth(0);   // kill boulder

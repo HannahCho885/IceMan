@@ -126,6 +126,7 @@ int StudentWorld::move(){
 	//for (int i = 0; i < objectList.size(); i++) { // delete dead game objects
 	//	if (objectList[i]->getHealth() == 0) {
 	//		delete objectList[i];
+	//		objectList[i] = nullptr;
 	//	}
 	//}
 
@@ -261,4 +262,22 @@ void StudentWorld::incrementOil() {
 
 void StudentWorld::incrementGold() {
 	goldNuggetsCollected++;
+}
+
+bool StudentWorld::checkCollision(int x, int y, Actor* object) {	// check for collision, return true and what you collided with if you collided
+	for (int i = 0; i < objectList.size(); i++) {	// check for collision with any object in the list
+		if (objectList[i]->getX() == x && objectList[i]->getY() == y) {
+			object = objectList[i];
+			return true;
+		}
+	}
+	if (player->getX() == x && player->getY() == y) {	// check for collision with player
+		object = player;
+		return true;
+	}
+	if (ice[x][y] != nullptr) {	// check for collision with ice
+		object = ice[x][y];
+		return true;
+	}
+	return false;
 }
