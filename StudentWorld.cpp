@@ -45,8 +45,8 @@ int StudentWorld::init(){
 		};
 	};
 
-	int xPos = 0; // x position of boulder
-	int yPos = 0; // y position of boulder
+	int xPos = 0; // x position of object to be placed
+	int yPos = 0; // y position of object to be placed
 
 	int bouldersPlaced = 0;		// tracks boulders placed vs number of boulders that should be on the map
 
@@ -101,12 +101,13 @@ int StudentWorld::init(){
 
 int StudentWorld::move(){
 	player->doSomething();
+
 	for (int i = 0; i < objectList.size(); i++) { // move for all the static objects
-		objectList[i]->doSomething();
+		if (objectList[i] != nullptr) {
+			objectList[i]->doSomething();
+		}
 	}
 
-	int check;
-	GameWorld::getKey(check);
 	//for each of the actors in the game world{
 	//	if (actor[i] is still active / alive){
 	//		ask each actor to do something (e.g. move) 
@@ -123,13 +124,14 @@ int StudentWorld::move(){
 
 	updateScore(); // update the score/lives/level text at top of screen
 
-	//for (int i = 0; i < objectList.size(); i++) { // delete dead game objects
-	//	if (objectList[i]->getHealth() == 0) {
-	//		delete objectList[i];
-	//		objectList[i] = nullptr;
-
-	//	}
-	//}
+	for (int i = 0; i < objectList.size(); i++) { // delete dead game objects
+		if (objectList[i] != nullptr) {
+			if (objectList[i]->getHealth() == 0) {
+				delete objectList[i];
+				objectList[i] = nullptr;
+			}
+		}
+	}
 
 	if (player->getHealth() == 0) {	// check for player death
 		decLives();
@@ -139,13 +141,10 @@ int StudentWorld::move(){
 	//if the player has collected all of the Barrels on the level, then return the result that the player finished the level
 	if (numOilBarrels == oilBarrelsCollected) {
 		GameController::getInstance().playSound(GWSTATUS_FINISHED_LEVEL);
-		advanceToNextLevel();
 		return GWSTATUS_FINISHED_LEVEL;
 	}
 
-	//decLives();
-	//return GWSTATUS_PLAYER_DIED;
-	return GWSTATUS_CONTINUE_GAME; 	// the player hasnâ€™t completed the current level and hasnâ€™t died, let them continue playing the current level
+	return GWSTATUS_CONTINUE_GAME; 	// the player hasn’t completed the current level and hasn’t died, let them continue playing the current level
 
 }
 void StudentWorld:: cleanUp(){
@@ -164,7 +163,7 @@ void StudentWorld:: cleanUp(){
 }
 
 void StudentWorld::updateScore(){
-	//Lvl: 52 Lives: 3 Hlth: 80% Wtr: 20 Gld: 3 Oil Left: 2 Sonar: 1 Scr: 321000
+	//example:    Lvl: 52 Lives: 3 Hlth: 80% Wtr: 20 Gld: 3 Oil Left: 2 Sonar: 1 Scr: 321000
 	gameStats = "Lvl: " + std::to_string(getLevel());
 	gameStats += "  Lives: " + std::to_string(getLives());
 	gameStats += "  Hlth: " + std::to_string(player->getHealth());	// note: set to % instead of raw amount
@@ -173,6 +172,7 @@ void StudentWorld::updateScore(){
 	gameStats += "  Oil Left: " + std::to_string(numOilBarrels - oilBarrelsCollected);
 	gameStats += "  Sonar: " + std::to_string(player->getSonarUnits());
 	gameStats += "  Scr: " + std::to_string(getScore());
+	setGameStatText(gameStats);
 }
 
 // generate a random spot on the map, as long as the spot isnt within 6 squares of anything that isnt an ice object
@@ -233,7 +233,7 @@ StudentWorld:: ~StudentWorld() {	// Destructor (copy of cleanUp())
 			}
 		}
 	}
-	delete[] player;	// dlete player IceMan from memory
+	delete[] player;	// delete player IceMan from memory
 
 	for (Actor* actor : objectList) { // clears out objectList from memory
 		delete[] actor;
@@ -265,11 +265,13 @@ void StudentWorld::incrementGold() {
 	goldNuggetsCollected++;
 }
 
-bool StudentWorld::checkCollision(int x, int y, Actor* object) {	// check for collision, return true and what you collided with if you collided
+bool StudentWorld::checkCollision(int x, int y, Actor*& object) {	// check for collision, return true and what you collided with if you collided
 	for (int i = 0; i < objectList.size(); i++) {	// check for collision with any object in the list
-		if (objectList[i]->getX() == x && objectList[i]->getY() == y) {
-			object = objectList[i];
-			return true;
+		if (objectList[i] != nullptr) {
+			if (objectList[i]->getX() == x && objectList[i]->getY() == y) {
+				object = objectList[i];
+				return true;
+			}
 		}
 	}
 	if (player->getX() == x && player->getY() == y) {	// check for collision with player
@@ -281,5 +283,4 @@ bool StudentWorld::checkCollision(int x, int y, Actor* object) {	// check for co
 		return true;
 	}
 	return false;
-
 }

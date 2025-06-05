@@ -57,7 +57,7 @@ iceMan::iceMan(int imageID, int startX, int startY, Direction startDirection, fl
 	: Actor(imageID, startX, startY, startDirection, size, depth) {
 	setIDNum(imageID);
 	moveTo(30, 60);
-	setHealth(10);
+	setHealth(100);
 	moveTo(startX, startY);
 	this->setVisible(true);
 }
@@ -82,7 +82,6 @@ void iceMan::doSomething() {
 								delete getStudentWorld()->getIceField(i, j);
 								getStudentWorld()->setIceField(i, j, nullptr);
 							}
-
 						}
 					}
 				}
@@ -164,6 +163,7 @@ Oil::Oil(int imageID, int startX, int startY, Direction startDirection, float si
 	: Actor(imageID, startX, startY, startDirection, size, depth) {
 	setIDNum(imageID);
 	this->setVisible(false);
+	setHealth(1);
 }
 
 Oil::~Oil() {
@@ -171,17 +171,23 @@ Oil::~Oil() {
 }
 
 void Oil::doSomething() {
-	if (this->getHealth() > 0) {    // If object not dead
-		if (this->isVisible() == false) { // if oil is not visible and <= 4 units away from player
-			this->isVisible() == true;
-			return;
-		}
-		else if (abs(getStudentWorld()->getPlayer()->getX() - getX()) <= 3 || abs(getStudentWorld()->getPlayer()->getY() - getY() <= 3)) { // if oil is <= 3 units away from player
-			this->setHealth(0); // prep for object death
-			GameController::getInstance().playSound(SOUND_FOUND_OIL);   // play sound
-			getStudentWorld()->increaseScore(1000); // Increase score by 1000 points
-			getStudentWorld()->incrementOil();// Inform the StudentWorld object that it was picked up
-		}
+	if (this->getHealth() == 0)	// If object is dead, do nothing
+	{
+		return;
+	}
+	int dx = getStudentWorld()->getPlayer()->getX() - getX();
+	int dy = getStudentWorld()->getPlayer()->getY() - getY();
+
+	if (!this->isVisible() && (dx * dx + dy * dy) <= 16) { // if oil is not visible and <= 4 units away from player
+		this->setVisible(true);
+		return;
+	}
+
+	if ((dx * dx + dy * dy) <= 9) { // if oil is <= 3 units away from player
+		this->setHealth(0); // prep for object death
+		GameController::getInstance().playSound(SOUND_FOUND_OIL); // play sound
+		getStudentWorld()->increaseScore(1000); // Increase score by 1000 points
+		getStudentWorld()->incrementOil(); // Inform the StudentWorld object that it was picked up
 	}
 }
 
@@ -190,6 +196,7 @@ Gold::Gold(int imageID, int startX, int startY, Direction startDirection, float 
 {
 	setIDNum(imageID);
 	this->setVisible(false);
+	setHealth(1);
 }
 
 Gold::~Gold() {
@@ -197,18 +204,31 @@ Gold::~Gold() {
 }
 
 void Gold::doSomething() {
-	if (this->getHealth() > 0) {
-		if (this->isVisible() == false) { // if oil is not visible and <= 4 units away from player
-			this->isVisible() == true;
-			return;
-		}
-		else if (abs(getStudentWorld()->getPlayer()->getX() - getX()) <= 3 || abs(getStudentWorld()->getPlayer()->getY() - getY() <= 3)) { // if oil is <= 3 units away from player
-			this->setHealth(0); // prep for object death
-			GameController::getInstance().playSound(SOUND_GOT_GOODIE);   // play sound
-			getStudentWorld()->increaseScore(10); // Increase score by 10 points
-			getStudentWorld()->incrementGold();// Inform the StudentWorld object that it was picked up
-		}
+	//int debugX = getStudentWorld()->getPlayer()->getX();
+	//int debugY = getStudentWorld()->getPlayer()->getY();
+	//int debugXThis = getX();
+	//int debugYThis = getY();
+
+	if (this->getHealth() == 0)	// If object is dead, do nothing
+	{
+		return;
 	}
+
+	int dx = getStudentWorld()->getPlayer()->getX() - getX();
+	int dy = getStudentWorld()->getPlayer()->getY() - getY();
+
+	if (!this->isVisible() && (dx * dx + dy * dy) <= 16) { // if gold is not visible and <= 4 units away from player
+		this->setVisible(true);
+		return;
+	}
+
+	if ((dx * dx + dy * dy) <= 9) { // if gold is <= 3 units away from player
+		this->setHealth(0); // prep for object death
+		GameController::getInstance().playSound(SOUND_GOT_GOODIE); // play sound
+		getStudentWorld()->increaseScore(10); // Increase score by 10 points
+		getStudentWorld()->incrementGold(); // Inform the StudentWorld object that it was picked up
+	}
+
 	if (tempGold == true) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
 		if (tick == 30) {
 			this->setHealth(0);
@@ -223,7 +243,7 @@ Boulder::Boulder(int imageID, int startX, int startY, Direction startDirection, 
 	: Actor(imageID, startX, startY, startDirection, size, depth)
 {
 	setIDNum(imageID);
-	setHealth(1000000);
+	setHealth(1);
 	this->setVisible(true);
 }
 
@@ -236,28 +256,38 @@ void Boulder::doSomething()
 	if (getHealth() == 0) {
 		return;  // do nothing if Boulder is destroyed
 	}
-
-	waiting = false;    // Start off ready to fall and then check if actually stable
-
 	int xPos = getX();
 	int yPos = getY();
 
-	if (waiting == false) { // check for stability
-		// check each 4 x-coordinate ice spots below boulder's y position
-		if (getStudentWorld()->getIceField(xPos, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 1, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 2, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 3, yPos - 1) == nullptr) { 
-			waiting = true;	// all 4 places below the boulder are empty, start the falling countdown
-		}
+	// check each 4 x-coordinate ice spots below boulder's y position
+	if (getStudentWorld()->getIceField(xPos, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 1, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 2, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 3, yPos - 1) == nullptr) { 
+		waiting = true;	// all 4 places below the boulder are empty, start the falling countdown
+		falling = true;
 	}
 
 	if (waiting == true) {
-		if (waitTimer >= 30) {
-			if (waitTimer == 30) { // only play the sound once
+		if (waitTimer >= 30) {	// once the boulder has waited 30 ticks
+			Actor* temp = nullptr;
+			if (waitTimer == 30) { // play the falling sound once
 				GameController::getInstance().playSound(SOUND_FALLING_ROCK);  // play sound when falling
 			}
-			if (getStudentWorld()->getIceField(xPos, yPos - 1) != nullptr || yPos == 0) { // if the spot below boulder is an object or the bottom of map
-				setHealth(0);   // kill boulder
-				waitTimer = 0;
-				waiting = false;
+			//if (getStudentWorld()->getIceField(xPos, yPos - 1) != nullptr || yPos == 0) { // if the spot below boulder is an object or the bottom of map
+			//	setHealth(0);   // kill boulder
+			//	waitTimer = 0;
+			//	waiting = false;
+			//}
+			if (getStudentWorld()->checkCollision(xPos, yPos-1, temp) || yPos == 0) { // if the spot below boulder is an object or the bottom of map
+				if (temp->getID() == 6) { // if the object is ice
+					setHealth(0);   // kill boulder
+					waitTimer = 0;
+					waiting = false;
+				}
+				if (temp->getID() == 0) { // if the object is the player
+					temp->setHealth(temp->getHealth()-1);	// reduce the player health by one
+					setHealth(0);   // kill boulder
+					waitTimer = 0;
+					waiting = false;
+				}
 			}
 			else {
 				moveTo(xPos, yPos - 1);  // move Boulder one square down
@@ -268,26 +298,6 @@ void Boulder::doSomething()
 			waitTimer++;
 		}
 	}
-}
-
-void Boulder::setStability(bool setting)
-{
-	stable = setting;
-}
-
-bool Boulder::getStability()
-{
-	return stable;
-}
-
-void Boulder::setWaiting(bool setting)
-{
-	waiting = setting;
-}
-
-bool Boulder::getWaiting()
-{
-	return waiting;
 }
 
 void Boulder::incrementWaitTimer()
@@ -304,6 +314,7 @@ Sonar::Sonar(int imageID, int startX, int startY, Direction startDirection, floa
 {
 	setIDNum(imageID);
 	this->setVisible(true);
+	setHealth(1);
 	maxNumSonar = 300 - (10 * getStudentWorld()->getLevel());
 	maxNumSonar = max(100, maxNumSonar); // max number of ticks water can be alive, requires unsigned int for max function
 }
@@ -333,6 +344,7 @@ Water::Water(int imageID, int startX, int startY, Direction startDirection, floa
 {
 	setIDNum(imageID);
 	this->setVisible(false);
+	setHealth(1);
 	maxNumWater = 300 - (10 * getStudentWorld()->getLevel());
 	maxNumWater = max(100, maxNumWater); // max number of ticks water can be alive, requires unsigned int for max function
 }

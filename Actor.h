@@ -113,21 +113,12 @@ public:
 
 	void doSomething();
 
-	void setStability(bool setting);
-
-
-	bool  getStability();
-
-	void setWaiting(bool setting);
-
-	bool  getWaiting();
-
 	void incrementWaitTimer();
 
 private:
 
-	bool stable;
-	bool waiting;
+	bool falling = false;
+	bool waiting = false;
 	int waitTimer = 0;
 	int tick = 0;
 
