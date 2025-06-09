@@ -47,6 +47,8 @@ public:
 
 	void randomValidLocation(int& x, int& y);
 
+	void StudentWorld::randomValidOpenLocation(int& x, int& y);
+
 	void incrementOil();
 
 	void incrementGold();

@@ -91,7 +91,7 @@ int StudentWorld::init(){
 		goldPlaced++;
 	}
 
-	goodieChance = getLevel() *30 + 290; // 1 in goodieChance chance for a Water Pool or Sonar Kit 
+	goodieChance = getLevel() *30 + 290; // 1 in goodieChance chance for a Water Pool or Sonar Kit to spawn
 
 	updateScore(); // ouput scoreboard
 	setGameStatText(gameStats);
@@ -100,6 +100,31 @@ int StudentWorld::init(){
 }
 
 int StudentWorld::move(){
+
+	std::random_device rd;	// seeds the RNG
+	std::mt19937 gen(rd()); // generates the random number from the seed
+	std::uniform_int_distribution<> itemSpawn(0, goodieChance-1); //ensures a uniform distribution over the specified range
+	std::uniform_int_distribution<> itemRoll(0, 4); //ensures a uniform distribution over the specified range
+	if (itemSpawn(gen) == 0) {
+		GraphObject::Direction dirRight = GraphObject::Direction::right; // direction object will start off facing
+
+		if (itemRoll(gen) == 0) {	// 1 in 5 chance to spawn a sonar kit
+			Sonar* sonarKit = new Sonar(8, 0, 60, dirRight, 1, 2);
+			sonarKit->setStudentWorld(this);
+			objectList.push_back(sonarKit);	// push object to object list
+		}
+		else {	// else spawn a water pool
+			int xPos = 0; // x position of object to be placed
+			int yPos = 0; // y position of object to be placed
+			Actor* temp = nullptr;
+			randomValidOpenLocation(xPos, yPos); 			// ensure water isnt placeed on anything else in a 4x4 square
+			Water* waterPool = new Water(9, xPos, yPos, dirRight, 1, 2);
+			waterPool->setStudentWorld(this);
+			objectList.push_back(waterPool);	// push object to object list
+		}
+	}
+
+
 	player->doSomething();
 
 	for (int i = 0; i < objectList.size(); i++) { // move for all the static objects
@@ -175,7 +200,7 @@ void StudentWorld::updateScore(){
 	setGameStatText(gameStats);
 }
 
-// generate a random spot on the map, as long as the spot isnt within 6 squares of anything that isnt an ice object
+// generate a random spot on the map, as long as the spot isnt within 6 squares of anything that isnt an ice object or in the shalft
 void StudentWorld::randomValidLocation(int& x, int& y) { 
 
 	bool safeSpot = false;
@@ -191,7 +216,7 @@ void StudentWorld::randomValidLocation(int& x, int& y) {
 
 		std::random_device rd;	// seeds the RNG
 		std::mt19937 gen(rd()); // generates the random number from the seed
-		std::uniform_int_distribution<> distY(0, 56); //ensures a uniform distribution over the specified range
+		std::uniform_int_distribution<> distY(0, 56); 
 
 		yPosition = distY(gen);
 
@@ -217,6 +242,43 @@ void StudentWorld::randomValidLocation(int& x, int& y) {
 							}
 						}
 					}
+				}
+			}
+		}
+	}
+	y = yPosition;
+	x = xPosition;
+}
+// generate a random spot on the map, as long as the spot isnt within 6 squares of anything
+void StudentWorld::randomValidOpenLocation(int& x, int& y) {
+
+	bool safeSpot = false;
+	int yPosition = 0;
+	int xPosition = 0;
+
+
+	while (safeSpot == false) {		//while the spot to place isnt safe, repeat this loop until safe spot is found
+
+		safeSpot = true; // assume the spot is safe, check if it isnt later
+
+		//generate random y position
+
+		std::random_device rd;	// seeds the RNG
+		std::mt19937 gen(rd()); // generates the random number from the seed
+		std::uniform_int_distribution<> distY(0, 56);
+
+		yPosition = distY(gen);
+
+		// generate random x position
+
+		std::uniform_int_distribution<> distX(0, 60); //ensures a uniform distribution over the specified range
+		xPosition = distX(gen);
+
+		for (int yCheck = yPosition; yCheck <= yPosition + 3 && safeSpot; yCheck++) {  // check +/- 4 y squares
+			for (int xCheck = xPosition; xCheck <= xPosition + 3 && safeSpot; xCheck++) { // check +/- 4 x squares
+				Actor* temp = nullptr;
+				if (checkCollision(xCheck, yCheck, temp) == true) {
+					safeSpot = false;
 				}
 			}
 		}

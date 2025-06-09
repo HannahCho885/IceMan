@@ -271,11 +271,6 @@ void Boulder::doSomething()
 			if (waitTimer == 30) { // play the falling sound once
 				GameController::getInstance().playSound(SOUND_FALLING_ROCK);  // play sound when falling
 			}
-			//if (getStudentWorld()->getIceField(xPos, yPos - 1) != nullptr || yPos == 0) { // if the spot below boulder is an object or the bottom of map
-			//	setHealth(0);   // kill boulder
-			//	waitTimer = 0;
-			//	waiting = false;
-			//}
 			if (getStudentWorld()->checkCollision(xPos, yPos-1, temp) || yPos == 0) { // if the spot below boulder is an object or the bottom of map
 				if (temp->getID() == 6) { // if the object is ice
 					setHealth(0);   // kill boulder
@@ -315,19 +310,23 @@ Sonar::Sonar(int imageID, int startX, int startY, Direction startDirection, floa
 	setIDNum(imageID);
 	this->setVisible(true);
 	setHealth(1);
-	maxNumSonar = 300 - (10 * getStudentWorld()->getLevel());
-	maxNumSonar = max(100, maxNumSonar); // max number of ticks water can be alive, requires unsigned int for max function
 }
 
 Sonar::~Sonar() {
 }
 
 void Sonar::doSomething() {
+	maxNumSonar = 300 - (10 * getStudentWorld()->getLevel());
+	maxNumSonar = max(100, maxNumSonar); // max number of ticks water can be alive, requires unsigned int for max function
+
 	if (getHealth() == 0) {
 		return;  // do nothing if sonar is destroyed
 	}
 
-	if (abs(getStudentWorld()->getPlayer()->getX() - getX()) <= 3 || abs(getStudentWorld()->getPlayer()->getY() - getY() <= 3)) { // if player is within 3 units
+	int dx = getStudentWorld()->getPlayer()->getX() - getX();
+	int dy = getStudentWorld()->getPlayer()->getY() - getY();
+
+	if ((dx * dx + dy * dy) <= 9) { // if sonar kit is <= 3 units away from player
 		setHealth(0);
 		GameController::getInstance().playSound(SOUND_GOT_GOODIE);  // play sound when picked up
 		getStudentWorld()->getPlayer()->addSonar(); // tell the Iceman object that it just received a new Sonar Kit
@@ -343,10 +342,8 @@ Water::Water(int imageID, int startX, int startY, Direction startDirection, floa
 	: Actor(imageID, startX, startY, startDirection, size, depth)
 {
 	setIDNum(imageID);
-	this->setVisible(false);
+	this->setVisible(true);
 	setHealth(1);
-	maxNumWater = 300 - (10 * getStudentWorld()->getLevel());
-	maxNumWater = max(100, maxNumWater); // max number of ticks water can be alive, requires unsigned int for max function
 }
 
 Water::~Water() {
@@ -354,15 +351,23 @@ Water::~Water() {
 }
 
 void Water::doSomething() {
+	maxNumWater = 300 - (10 * getStudentWorld()->getLevel());
+	maxNumWater = max(100, maxNumWater); // max number of ticks water can be alive, requires unsigned int for max function
+
 	if (getHealth() == 0) {
-		return;  // do nothing if sonar is destroyed
+		return;  // do nothing if water is consumed
 	}
-	if (abs(getStudentWorld()->getPlayer()->getX() - getX()) <= 3 || abs(getStudentWorld()->getPlayer()->getY() - getY() <= 3)) { // if player is within 3 units
+
+	int dx = getStudentWorld()->getPlayer()->getX() - getX();
+	int dy = getStudentWorld()->getPlayer()->getY() - getY();
+
+	if ((dx * dx + dy * dy) <= 9) { // if water is <= 3 units away from player
 		setHealth(0);
 		GameController::getInstance().playSound(SOUND_GOT_GOODIE);  // play sound when picked up
 		getStudentWorld()->getPlayer()->addWater(); // tell the Iceman object that it just received 5 water squirts
 		getStudentWorld()->increaseScore(100); // increase score by 100 points
 	}
+
 	tick++;
 	if (tick >= maxNumWater) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
 		setHealth(0);
