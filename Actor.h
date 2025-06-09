@@ -154,3 +154,16 @@ private:
 
 #endif // ACTOR_H_
 
+//class Squirt : public Actor
+//{
+//public:
+//	Squirt(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
+//
+//	~Squirt();
+//
+//	void doSomething();
+//
+//private:
+//	int tick = 0;
+//};
+

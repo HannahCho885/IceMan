@@ -138,7 +138,25 @@ void iceMan::doSomething() {
 				}
 			}
 			break;
+		case KEY_PRESS_SPACE:
+			//Actor* temp;
+			//switch (getDirection()) {
+			//case down:
+			//	Squirt* squirt = new Squirt(4, getX(), getY()-1, getDirection(), 1, 1);
+			//	getStudentWorld()->checkCollision(getX(), getY() - 1, temp);
+			//	if (temp->getID() == 1 || temp->getID() == 2) {
+			//		temp->setHealth(temp->getHealth()-2);
+			//	}
+			//case up:
+			//	Squirt* squirt = new Squirt(4, getX(), getY() + 1, getDirection(), 1, 1);
+			//case left:
+			//	Squirt* squirt = new Squirt(4, getX()-1, getY(), getDirection(), 1, 1);
+			//case right:
+			//	Squirt* squirt = new Squirt(4, getX()+1, getY(), getDirection(), 1, 1);
+			//}
+			break;
 		}
+
 	}
 }
 
@@ -272,16 +290,19 @@ void Boulder::doSomething()
 				GameController::getInstance().playSound(SOUND_FALLING_ROCK);  // play sound when falling
 			}
 			if (getStudentWorld()->checkCollision(xPos, yPos-1, temp) || yPos == 0) { // if the spot below boulder is an object or the bottom of map
-				if (temp->getID() == 6) { // if the object is ice
+				if (temp->getID() == 6 || temp->getID() == 4) { // if the object is ice
 					setHealth(0);   // kill boulder
 					waitTimer = 0;
 					waiting = false;
 				}
 				if (temp->getID() == 0) { // if the object is the player
-					temp->setHealth(temp->getHealth()-1);	// reduce the player health by one
-					setHealth(0);   // kill boulder
-					waitTimer = 0;
-					waiting = false;
+					temp->setHealth(0);	// reduce the player health to zero
+				}
+				if (temp->getID() == 1) { // if the object is a protestor
+					temp->setHealth(0);	// reduce the protestor health to zero
+				}
+				if (temp->getID() == 2) { // if the object is a hardcore protestor
+					temp->setHealth(0);	// reduce the hardcore protestor health to zero
 				}
 			}
 			else {
@@ -373,5 +394,32 @@ void Water::doSomething() {
 		setHealth(0);
 	}
 }
+//Squirt::Squirt(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
+//	: Actor(imageID, startX, startY, startDirection, size, depth)
+//{
+//	setIDNum(imageID);
+//	this->setVisible(true);
+//	setHealth(1);
+//}
+//
+//Squirt::~Squirt() {
+//
+//}
+//
+//void Squirt::doSomething() {
+//	//if (getHealth() == 0) {
+//	//	return;  // do nothing if water is consumed
+//	//}
+//
+//	//int dx = getStudentWorld()->getPlayer()->getX() - getX();
+//	//int dy = getStudentWorld()->getPlayer()->getY() - getY();
+//
+//	//if ((dx * dx + dy * dy) <= 9) { // if water is <= 3 units away from player
+//	//	setHealth(0);
+//	//	GameController::getInstance().playSound(SOUND_GOT_GOODIE);  // play sound when picked up
+//	//	getStudentWorld()->getPlayer()->addWater(); // tell the Iceman object that it just received 5 water squirts
+//	//	getStudentWorld()->increaseScore(100); // increase score by 100 points
+//	//}
+//}
 
 #endif // ACTOR_CPP_
