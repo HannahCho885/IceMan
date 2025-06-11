@@ -69,7 +69,7 @@ public:
 	void addSonar();
 
 private:
-	int waterUnits = 0;
+	int waterUnits = 5;
 	int sonarUnits = 0;
 
 };
@@ -118,8 +118,7 @@ public:
 private:
 
 	bool falling = false;
-	bool waiting = false;
-	int waitTimer = 0;
+	int fallTimer = 0;
 	int tick = 0;
 
 };
@@ -152,18 +151,22 @@ private:
 	int maxNumWater = 0;
 };
 
+
+
+class Squirt : public Actor
+{
+public:
+	Squirt(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
+
+	~Squirt();
+
+	void doSomething();
+
+	void setDirection();
+
+private:
+	int tick = 0;
+	int distance = 0;
+};
+
 #endif // ACTOR_H_
-
-//class Squirt : public Actor
-//{
-//public:
-//	Squirt(int imageID, int startX, int startY, Direction startDirection, float size = 1.0, unsigned int depth = 0);
-//
-//	~Squirt();
-//
-//	void doSomething();
-//
-//private:
-//	int tick = 0;
-//};
-

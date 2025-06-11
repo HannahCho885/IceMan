@@ -139,24 +139,40 @@ void iceMan::doSomething() {
 			}
 			break;
 		case KEY_PRESS_SPACE:
-			//Actor* temp;
-			//switch (getDirection()) {
-			//case down:
-			//	Squirt* squirt = new Squirt(4, getX(), getY()-1, getDirection(), 1, 1);
-			//	getStudentWorld()->checkCollision(getX(), getY() - 1, temp);
-			//	if (temp->getID() == 1 || temp->getID() == 2) {
-			//		temp->setHealth(temp->getHealth()-2);
-			//	}
-			//case up:
-			//	Squirt* squirt = new Squirt(4, getX(), getY() + 1, getDirection(), 1, 1);
-			//case left:
-			//	Squirt* squirt = new Squirt(4, getX()-1, getY(), getDirection(), 1, 1);
-			//case right:
-			//	Squirt* squirt = new Squirt(4, getX()+1, getY(), getDirection(), 1, 1);
-			//}
-			break;
+			if (waterUnits > 0) {
+				switch (getDirection()) {
+				case down: {
+					Squirt* squirt = new Squirt(3, getX(), getY() - 1, getDirection(), 1, 1);
+					squirt->setStudentWorld(getStudentWorld());
+					getStudentWorld()->addToObjectList(squirt);
+					waterUnits--;
+					break;
+				}
+				case up: {
+					Squirt* squirt = new Squirt(3, getX(), getY() + 1, getDirection(), 1, 1);
+					getStudentWorld()->addToObjectList(squirt);
+					squirt->setStudentWorld(getStudentWorld());
+					waterUnits--;
+					break;
+				}
+				case left: {
+					Squirt* squirt = new Squirt(3, getX() - 1, getY(), getDirection(), 1, 1);
+					getStudentWorld()->addToObjectList(squirt);
+					squirt->setStudentWorld(getStudentWorld());
+					waterUnits--;
+					break;
+				}
+				case right: {
+					Squirt* squirt = new Squirt(3, getX() + 1, getY(), getDirection(), 1, 1);
+					getStudentWorld()->addToObjectList(squirt);
+					squirt->setStudentWorld(getStudentWorld());
+					waterUnits--;
+					break;
+				}
+						  break;
+				}
+			}
 		}
-
 	}
 }
 
@@ -222,10 +238,6 @@ Gold::~Gold() {
 }
 
 void Gold::doSomething() {
-	//int debugX = getStudentWorld()->getPlayer()->getX();
-	//int debugY = getStudentWorld()->getPlayer()->getY();
-	//int debugXThis = getX();
-	//int debugYThis = getY();
 
 	if (this->getHealth() == 0)	// If object is dead, do nothing
 	{
@@ -278,47 +290,55 @@ void Boulder::doSomething()
 	int yPos = getY();
 
 	// check each 4 x-coordinate ice spots below boulder's y position
-	if (getStudentWorld()->getIceField(xPos, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 1, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 2, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 3, yPos - 1) == nullptr) { 
-		waiting = true;	// all 4 places below the boulder are empty, start the falling countdown
-		falling = true;
+	if (getStudentWorld()->getIceField(xPos, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 1, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 2, yPos - 1) == nullptr && getStudentWorld()->getIceField(xPos + 3, yPos - 1) == nullptr) {
+		falling = true; // all 4 places below the boulder are empty, start the falling countdown
 	}
 
-	if (waiting == true) {
-		if (waitTimer >= 30) {	// once the boulder has waited 30 ticks
-			Actor* temp = nullptr;
-			if (waitTimer == 30) { // play the falling sound once
+	if (falling == true) {
+		if (fallTimer >= 30) {	// once the boulder has waited 30 ticks
+			if (fallTimer == 30) { // play the falling sound once
 				GameController::getInstance().playSound(SOUND_FALLING_ROCK);  // play sound when falling
 			}
-			if (getStudentWorld()->checkCollision(xPos, yPos-1, temp) || yPos == 0) { // if the spot below boulder is an object or the bottom of map
-				if (temp->getID() == 6 || temp->getID() == 4) { // if the object is ice
-					setHealth(0);   // kill boulder
-					waitTimer = 0;
-					waiting = false;
-				}
-				if (temp->getID() == 0) { // if the object is the player
-					temp->setHealth(0);	// reduce the player health to zero
-				}
-				if (temp->getID() == 1) { // if the object is a protestor
-					temp->setHealth(0);	// reduce the protestor health to zero
-				}
-				if (temp->getID() == 2) { // if the object is a hardcore protestor
-					temp->setHealth(0);	// reduce the hardcore protestor health to zero
-				}
-			}
-			else {
-				moveTo(xPos, yPos - 1);  // move Boulder one square down
+			Actor* temp = nullptr;
+			if (yPos == 0) { // if the boulder is at the bottom of the map
+				setHealth(0);   // kill boulder
+				fallTimer = 0;
+				falling = false;
 			}
 
+			for (int i = xPos - 3; i <= xPos + 3; i++) { // check within 3 units of the boulder
+				for (int j = yPos - 3; j < yPos; j++) {
+					if (getStudentWorld()->checkCollision(i, j, temp)) { // if the boulder hits an object
+						if (i == xPos) {
+							if (temp->getID() == 6 || temp->getID() == 4) { // if the object is ice or a boulder
+								setHealth(0);   // kill boulder
+								fallTimer = 0;
+								falling = false;
+							}
+						}
+						if (temp->getID() == 0) { // if the object is the player
+							temp->setHealth(0);	// reduce the player health to zero
+						}
+						if (temp->getID() == 1) { // if the object is a protestor
+							temp->setHealth(0);	// reduce the protestor health to zero
+						}
+						if (temp->getID() == 2) { // if the object is a hardcore protestor
+							temp->setHealth(0);	// reduce the hardcore protestor health to zero
+						}
+					}
+				}
+			}
+			moveTo(xPos, yPos - 1);  // move Boulder one square down
 		}
 		else {
-			waitTimer++;
+			fallTimer++;
 		}
 	}
 }
 
 void Boulder::incrementWaitTimer()
 {
-	waitTimer++;
+	fallTimer++;
 }
 
 void Actor::setStudentWorld(StudentWorld* inputStudentWorld) {
@@ -394,32 +414,88 @@ void Water::doSomething() {
 		setHealth(0);
 	}
 }
-//Squirt::Squirt(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
-//	: Actor(imageID, startX, startY, startDirection, size, depth)
-//{
-//	setIDNum(imageID);
-//	this->setVisible(true);
-//	setHealth(1);
-//}
-//
-//Squirt::~Squirt() {
-//
-//}
-//
-//void Squirt::doSomething() {
-//	//if (getHealth() == 0) {
-//	//	return;  // do nothing if water is consumed
-//	//}
-//
-//	//int dx = getStudentWorld()->getPlayer()->getX() - getX();
-//	//int dy = getStudentWorld()->getPlayer()->getY() - getY();
-//
-//	//if ((dx * dx + dy * dy) <= 9) { // if water is <= 3 units away from player
-//	//	setHealth(0);
-//	//	GameController::getInstance().playSound(SOUND_GOT_GOODIE);  // play sound when picked up
-//	//	getStudentWorld()->getPlayer()->addWater(); // tell the Iceman object that it just received 5 water squirts
-//	//	getStudentWorld()->increaseScore(100); // increase score by 100 points
-//	//}
-//}
+Squirt::Squirt(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
+	: Actor(imageID, startX, startY, startDirection, size, depth)
+{
+	setIDNum(imageID);
+	this->setVisible(true);
+	setHealth(1);
+}
+
+Squirt::~Squirt() {
+
+}
+
+void Squirt::doSomething() {
+
+	if (getHealth() == 0) {
+		return;  // do nothing if water is consumed
+	}
+
+	int xPos = getX();
+	int yPos = getY();
+	Actor* temp = nullptr;
+
+	for (int i = xPos - 3; i <= xPos + 3; i++) {
+		for (int j = yPos - 3; j <= yPos; j++) {
+			int dx = i - xPos;
+			int dy = j - yPos;
+			if (dx * dx + dy * dy <= 9) { // Euclidean distance <= 3
+				if (i >= 0 && i <= 60 && j >= 0 && j <= 60) {
+					if (getStudentWorld()->checkCollision(i, j, temp)) {
+						if (temp->getID() == 1 || temp->getID() == 2) {
+							temp->setHealth(temp->getHealth() - 2); // damage protestor or hardcore protestor
+						}
+					}
+				}
+			}
+		}
+	}
+	if (distance == 4) { // if squirt traveled full distance, kill it
+		setHealth(0);
+		return;
+	}
+
+	switch (getDirection()) {
+	case up:
+		if (getStudentWorld()->checkCollision(getX(), getY() + 1, temp)) {
+			setHealth(0);
+		}
+		else {
+			moveTo(xPos, yPos + 1);  // move squirt one square up
+		}
+		break;
+	case down:
+		if (getStudentWorld()->checkCollision(getX(), getY() - 1, temp)) {
+			setHealth(0);
+		}
+		else {
+			moveTo(xPos, yPos - 1);  // move squirt one square down
+		}
+		break;
+	case left:
+		if (getStudentWorld()->checkCollision(getX() - 1, getY(), temp)) {
+			setHealth(0);
+		}
+		else {
+			moveTo(xPos - 1, yPos);  // move squirt one square left
+		}
+		break;
+	case right:
+		if (getStudentWorld()->checkCollision(getX() + 3, getY(), temp)) {
+			setHealth(0);
+		}
+		else {
+			moveTo(xPos + 1, yPos);  // move squirt one square right
+		}
+		break;
+	}
+	distance++;
+
+}
+
+void Squirt::setDirection() {
+
+}
 
 #endif // ACTOR_CPP_

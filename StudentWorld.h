@@ -61,6 +61,8 @@ public:
 
 	vector<Actor*> getObjectList();
 
+	void addToObjectList(Actor* object);
+
 	bool checkCollision(int x, int y, Actor*& object);
 };
 

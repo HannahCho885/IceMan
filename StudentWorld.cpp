@@ -346,3 +346,7 @@ bool StudentWorld::checkCollision(int x, int y, Actor*& object) {	// check for c
 	}
 	return false;
 }
+
+void StudentWorld::addToObjectList(Actor* object) {
+	objectList.push_back(object);
+}
