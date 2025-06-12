@@ -53,6 +53,10 @@ public:
 
 	void incrementGold();
 
+	int getGold();
+
+	void decrementGold();
+
 	iceMan* getPlayer();
 
 	Ice* getIceField(int x, int y);
@@ -64,6 +68,8 @@ public:
 	void addToObjectList(Actor* object);
 
 	bool checkCollision(int x, int y, Actor*& object);
+
+	bool checkRadialCollision(int x, int y, int range, int targetID, Actor* objectHit);
 };
 
 #endif // STUDENTWORLD_H_

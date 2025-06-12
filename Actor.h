@@ -70,7 +70,7 @@ public:
 
 private:
 	int waterUnits = 5;
-	int sonarUnits = 0;
+	int sonarUnits = 1;
 
 };
 
@@ -96,6 +96,8 @@ public:
     ~Gold();
 
 	void doSomething();
+
+	void setTemp(bool setting);
 
 private:
 	bool tempGold = false;

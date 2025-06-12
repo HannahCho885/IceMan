@@ -57,7 +57,7 @@ iceMan::iceMan(int imageID, int startX, int startY, Direction startDirection, fl
 	: Actor(imageID, startX, startY, startDirection, size, depth) {
 	setIDNum(imageID);
 	moveTo(30, 60);
-	setHealth(100);
+	setHealth(10);
 	moveTo(startX, startY);
 	this->setVisible(true);
 }
@@ -138,7 +138,7 @@ void iceMan::doSomething() {
 				}
 			}
 			break;
-		case KEY_PRESS_SPACE:
+		case KEY_PRESS_SPACE:	// fire a squirt of water
 			if (waterUnits > 0) {
 				switch (getDirection()) {
 				case down: {
@@ -169,9 +169,36 @@ void iceMan::doSomething() {
 					waterUnits--;
 					break;
 				}
-						  break;
 				}
 			}
+			break;
+		case KEY_PRESS_ESCAPE:	// abort the level
+			setHealth(0);
+			break;
+		case 'z':	// use sonar kit
+			if (sonarUnits > 0) {
+				sonarUnits--;
+				Actor* temp = nullptr;
+				getStudentWorld()->checkRadialCollision(getX(), getY(), 12, 5, temp);	// check for nearby Oil
+				if (temp != nullptr) {
+					temp->setVisible(true);
+				}
+				getStudentWorld()->checkRadialCollision(getX(), getY(), 12, 7, temp);	// check for nearby Gold
+				if (temp != nullptr) {
+					temp->setVisible(true);
+				}
+			}
+			break;
+		case KEY_PRESS_TAB:	// place gold nugget on map
+			if (getStudentWorld()->getGold() > 0) {
+				Gold* goldNugget = new Gold(7, getX(), getY(), getDirection(), 1, 2);
+				goldNugget->setTemp(true);
+				goldNugget->setVisible(true);
+				goldNugget->setStudentWorld(getStudentWorld());
+				getStudentWorld()->addToObjectList(goldNugget); // push object to object list	
+				getStudentWorld()->decrementGold();
+			}
+			break;
 		}
 	}
 }
@@ -190,7 +217,7 @@ void iceMan::addWater() {
 }
 
 void iceMan::addSonar() {
-	sonarUnits++;
+	sonarUnits = sonarUnits + 2;
 }
 
 Oil::Oil(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
@@ -238,35 +265,37 @@ Gold::~Gold() {
 }
 
 void Gold::doSomething() {
-
-	if (this->getHealth() == 0)	// If object is dead, do nothing
-	{
-		return;
-	}
-
-	int dx = getStudentWorld()->getPlayer()->getX() - getX();
-	int dy = getStudentWorld()->getPlayer()->getY() - getY();
-
-	if (!this->isVisible() && (dx * dx + dy * dy) <= 16) { // if gold is not visible and <= 4 units away from player
-		this->setVisible(true);
-		return;
-	}
-
-	if ((dx * dx + dy * dy) <= 9) { // if gold is <= 3 units away from player
-		this->setHealth(0); // prep for object death
-		GameController::getInstance().playSound(SOUND_GOT_GOODIE); // play sound
-		getStudentWorld()->increaseScore(10); // Increase score by 10 points
-		getStudentWorld()->incrementGold(); // Inform the StudentWorld object that it was picked up
-	}
-
-	if (tempGold == true) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
-		if (tick == 30) {
-			this->setHealth(0);
+	if (tempGold == false) { // permanent gold only lootable by IceMan
+		if (this->getHealth() == 0)	// If object is dead, do nothing
+		{
+			return;
 		}
-		else {
-			tick--;
+
+		int dx = getStudentWorld()->getPlayer()->getX() - getX();
+		int dy = getStudentWorld()->getPlayer()->getY() - getY();
+
+		if (!this->isVisible() && (dx * dx + dy * dy) <= 16) { // if gold is not visible and <= 4 units away from player
+			this->setVisible(true);
+			return;
+		}
+
+		if ((dx * dx + dy * dy) <= 9) { // if gold is <= 3 units away from player
+			this->setHealth(0); // prep for object death
+			GameController::getInstance().playSound(SOUND_GOT_GOODIE); // play sound
+			getStudentWorld()->increaseScore(10); // Increase score by 10 points
+			getStudentWorld()->incrementGold(); // Inform the StudentWorld object that it was picked up
 		}
 	}
+	else {	// temp gold only lootable by Protestors
+		tick++;
+		if (tick == 100) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
+			setHealth(0);
+		}
+	}
+	
+}
+void Gold::setTemp(bool setting) {
+	tempGold = setting;
 }
 
 Boulder::Boulder(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
@@ -435,6 +464,8 @@ void Squirt::doSomething() {
 	int xPos = getX();
 	int yPos = getY();
 	Actor* temp = nullptr;
+
+	GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);  // play sound when used
 
 	for (int i = xPos - 3; i <= xPos + 3; i++) {
 		for (int j = yPos - 3; j <= yPos; j++) {

@@ -7,9 +7,9 @@ GameWorld* createStudentWorld(string assetDir)
 {
 	return new StudentWorld(assetDir);
 }
-StudentWorld::StudentWorld(std::string assetDir) : GameWorld(assetDir){
+StudentWorld::StudentWorld(std::string assetDir) : GameWorld(assetDir) {
 }
-int StudentWorld::init(){
+int StudentWorld::init() {
 	// generate a signed int for how many of each to spawn (requires a signed integer eg. no math in assignment operator)
 	int boulders = getLevel() / 2 + 2;
 	int golds = 5 - getLevel() / 2;
@@ -57,7 +57,7 @@ int StudentWorld::init(){
 		}
 		Boulder* boulder = new Boulder(4, xPos, yPos, dirRight, 1, 1); // Boulder builds from the bottom left corner of the boulder
 		boulder->setStudentWorld(this);
-		
+
 		// clear out the 4 x 4 ice beneath the boulder
 		for (int i = yPos; i < (yPos + 4); i++) {
 			for (int n = xPos; n < (xPos + 4); n++) {
@@ -86,12 +86,13 @@ int StudentWorld::init(){
 	while (goldPlaced != numGoldNuggets) {
 		randomValidLocation(xPos, yPos);
 		Gold* goldNugget = new Gold(7, xPos, yPos, dirRight, 1, 2);
+		goldNugget->setTemp(false);
 		goldNugget->setStudentWorld(this);
 		objectList.push_back(goldNugget);	// push object to object list
 		goldPlaced++;
 	}
 
-	goodieChance = getLevel() *30 + 290; // 1 in goodieChance chance for a Water Pool or Sonar Kit to spawn
+	goodieChance = getLevel() * 30 + 290; // 1 in goodieChance chance for a Water Pool or Sonar Kit to spawn
 
 	updateScore(); // ouput scoreboard
 	setGameStatText(gameStats);
@@ -99,11 +100,11 @@ int StudentWorld::init(){
 
 }
 
-int StudentWorld::move(){
+int StudentWorld::move() {
 
 	std::random_device rd;	// seeds the RNG
 	std::mt19937 gen(rd()); // generates the random number from the seed
-	std::uniform_int_distribution<> itemSpawn(0, goodieChance-1); //ensures a uniform distribution over the specified range
+	std::uniform_int_distribution<> itemSpawn(0, goodieChance - 1); //ensures a uniform distribution over the specified range
 	std::uniform_int_distribution<> itemRoll(0, 4); //ensures a uniform distribution over the specified range
 	if (itemSpawn(gen) == 0) {
 		GraphObject::Direction dirRight = GraphObject::Direction::right; // direction object will start off facing
@@ -133,20 +134,6 @@ int StudentWorld::move(){
 		}
 	}
 
-	//for each of the actors in the game world{
-	//	if (actor[i] is still active / alive){
-	//		ask each actor to do something (e.g. move) 
-	//		tellThisActorToDoSomething(actor[i]);
-	//		if (theplayerDiedDuringThisTick() == true) {
-	//			return GWSTATUS_PLAYER_DIED;
-	//	}
-	//		if (theplayerCompletedTheCurrentLevel() == true){
-	//			return GWSTATUS_FINISHED_LEVEL;
-	//		}
-	//	}
-	//}
-
-
 	updateScore(); // update the score/lives/level text at top of screen
 
 	for (int i = 0; i < objectList.size(); i++) { // delete dead game objects
@@ -172,7 +159,7 @@ int StudentWorld::move(){
 	return GWSTATUS_CONTINUE_GAME; 	// the player hasn’t completed the current level and hasn’t died, let them continue playing the current level
 
 }
-void StudentWorld:: cleanUp(){
+void StudentWorld::cleanUp() {
 	for (int i = 0; i < 64; i++) {
 		for (int j = 0; j < 60; j++) {
 			if (ice[i][j] != nullptr) {
@@ -184,14 +171,16 @@ void StudentWorld:: cleanUp(){
 	for (Actor* actor : objectList) { // clears out objectList
 		delete actor;
 	}
+	oilBarrelsCollected = 0;
+	goldNuggetsCollected = 0;
 	objectList.clear();
 }
 
-void StudentWorld::updateScore(){
+void StudentWorld::updateScore() {
 	//example:    Lvl: 52 Lives: 3 Hlth: 80% Wtr: 20 Gld: 3 Oil Left: 2 Sonar: 1 Scr: 321000
 	gameStats = "Lvl: " + std::to_string(getLevel());
 	gameStats += "  Lives: " + std::to_string(getLives());
-	gameStats += "  Hlth: " + std::to_string(player->getHealth());	// note: set to % instead of raw amount
+	gameStats += "  Hlth: " + std::to_string(player->getHealth()*10);	// note: set to % instead of raw amount
 	gameStats += "%  Wtr: " + std::to_string(player->getWaterUnits());
 	gameStats += "  Gld: " + std::to_string(goldNuggetsCollected);
 	gameStats += "  Oil Left: " + std::to_string(numOilBarrels - oilBarrelsCollected);
@@ -201,7 +190,7 @@ void StudentWorld::updateScore(){
 }
 
 // generate a random spot on the map, as long as the spot isnt within 6 squares of anything that isnt an ice object or in the shalft
-void StudentWorld::randomValidLocation(int& x, int& y) { 
+void StudentWorld::randomValidLocation(int& x, int& y) {
 
 	bool safeSpot = false;
 	int yPosition = 0;
@@ -216,7 +205,7 @@ void StudentWorld::randomValidLocation(int& x, int& y) {
 
 		std::random_device rd;	// seeds the RNG
 		std::mt19937 gen(rd()); // generates the random number from the seed
-		std::uniform_int_distribution<> distY(0, 56); 
+		std::uniform_int_distribution<> distY(0, 56);
 
 		yPosition = distY(gen);
 
@@ -307,15 +296,15 @@ iceMan* StudentWorld::getPlayer() {
 	return player;
 }
 
-Ice* StudentWorld:: getIceField(int x, int y) {
+Ice* StudentWorld::getIceField(int x, int y) {
 	return ice[x][y];
 }
 
-void StudentWorld::setIceField(int x, int y, Ice* temp){
+void StudentWorld::setIceField(int x, int y, Ice* temp) {
 	ice[x][y] = temp;
 }
 
-vector<Actor*> StudentWorld:: getObjectList() {
+vector<Actor*> StudentWorld::getObjectList() {
 	return objectList;
 }
 
@@ -349,4 +338,31 @@ bool StudentWorld::checkCollision(int x, int y, Actor*& object) {	// check for c
 
 void StudentWorld::addToObjectList(Actor* object) {
 	objectList.push_back(object);
+}
+
+bool StudentWorld::checkRadialCollision(int x, int y, int range, int targetID, Actor* objectHit) {
+	for (int i = 0; i < objectList.size(); i++) {
+		if (objectList[i] != nullptr) {
+			if (objectList[i]->getID() == targetID) {	// check if its the target object
+				int dx = x - objectList[i]->getX();
+				int dy = y - objectList[i]->getY();
+				double distance = std::sqrt(dx * dx + dy * dy);
+
+				if (distance <= range) {
+					objectHit = objectList[i];  // set the pointer to the object hit
+					objectList[i]->setVisible(true);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+int StudentWorld::getGold() {
+	return goldNuggetsCollected;
+}
+
+void StudentWorld::decrementGold() {
+	goldNuggetsCollected--;
 }
