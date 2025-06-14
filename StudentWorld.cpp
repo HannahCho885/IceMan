@@ -9,6 +9,7 @@ GameWorld* createStudentWorld(string assetDir)
 }
 StudentWorld::StudentWorld(std::string assetDir) : GameWorld(assetDir) {
 }
+
 int StudentWorld::init() {
 	// generate a signed int for how many of each to spawn (requires a signed integer eg. no math in assignment operator)
 	int boulders = getLevel() / 2 + 2;
@@ -24,6 +25,10 @@ int StudentWorld::init() {
 	GraphObject::Direction dirUp = GraphObject::Direction::up;
 	player = new iceMan(0, 30, 60, dirLeft, 1.0, 0);	// generate new player object
 	player->setStudentWorld(this);
+	
+	enemy = new protestor(1, 59, 60, dirLeft, 1.0, 0); 	//generate new protestor object
+	enemy->setStudentWorld(this);
+	objectList.push_back(enemy);
 
 	for (int i = 0; i < 64; i++) { 	// initialize the ice map to nullptr to prevent read errors
 		for (int j = 0; j < 60; j++) {
@@ -126,7 +131,7 @@ int StudentWorld::move() {
 	}
 
 
-	player->doSomething();
+	player->doSomething();	// do player action
 
 	for (int i = 0; i < objectList.size(); i++) { // move for all the static objects
 		if (objectList[i] != nullptr) {
@@ -329,9 +334,11 @@ bool StudentWorld::checkCollision(int x, int y, Actor*& object) {	// check for c
 		object = player;
 		return true;
 	}
-	if (ice[x][y] != nullptr) {	// check for collision with ice
-		object = ice[x][y];
-		return true;
+	if (x >= 0 && x <= 63 && y >= 0 && y <= 59) {
+		if (ice[x][y] != nullptr) {	// check for collision with ice
+			object = ice[x][y];
+			return true;
+		}
 	}
 	return false;
 }
@@ -340,7 +347,7 @@ void StudentWorld::addToObjectList(Actor* object) {
 	objectList.push_back(object);
 }
 
-bool StudentWorld::checkRadialCollision(int x, int y, int range, int targetID, Actor* objectHit) {
+bool StudentWorld::checkRadialCollision(int x, int y, int range, int targetID, Actor*& objectHit) {
 	for (int i = 0; i < objectList.size(); i++) {
 		if (objectList[i] != nullptr) {
 			if (objectList[i]->getID() == targetID) {	// check if its the target object
@@ -354,6 +361,16 @@ bool StudentWorld::checkRadialCollision(int x, int y, int range, int targetID, A
 					return true;
 				}
 			}
+		}
+	}
+	if (player->getID() == targetID) {	// check if its the target object
+		int dx = x - player->getX();
+		int dy = y - player->getY();
+		double distance = std::sqrt(dx * dx + dy * dy);
+
+		if (distance <= range) {
+			objectHit = player;  // set the pointer to the object hit
+			return true;
 		}
 	}
 	return false;

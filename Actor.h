@@ -74,6 +74,24 @@ private:
 
 };
 
+class protestor : public Actor
+{
+public:
+	protestor(int imageID, int startX, int startY, Direction startDirection, float size = 1.0f, unsigned int depth = 0);
+
+	~protestor();
+
+	void doSomething();
+
+	void leave_the_oilfield(int x, int y);
+
+	int numSquaresToMoveInCurrentDirection();
+
+private:
+	int health = 6;
+	int tick = 0;
+};
+
 class Oil : public Actor
 {
 public:

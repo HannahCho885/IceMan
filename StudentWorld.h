@@ -26,6 +26,7 @@ private:
 	int goldNuggetsCollected = 0;
 	int numOilBarrels = 0;
 	int oilBarrelsCollected = 0;
+	protestor* enemy;
 	iceMan* player;
 	Ice* ice[64][60];
 	vector<Actor*> objectList;
@@ -69,7 +70,7 @@ public:
 
 	bool checkCollision(int x, int y, Actor*& object);
 
-	bool checkRadialCollision(int x, int y, int range, int targetID, Actor* objectHit);
+	bool checkRadialCollision(int x, int y, int range, int targetID, Actor*& objectHit);
 };
 
 #endif // STUDENTWORLD_H_

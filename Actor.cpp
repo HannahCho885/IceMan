@@ -74,7 +74,8 @@ void iceMan::doSomething() {
 			if (left != getDirection()) { setDirection(left); }
 			if (getX() - 1 < 0) { break; }
 			else {
-				if (getStudentWorld()->checkRadialCollision(getX() - 1, getY(), 3, 4, nullptr)) {
+				Actor* temp = nullptr;
+				if (getStudentWorld()->checkRadialCollision(getX() - 1, getY(), 3, 4, temp)) {
 					break;
 				}
 				moveTo(getX() - 1, getY());
@@ -84,6 +85,7 @@ void iceMan::doSomething() {
 							if (getStudentWorld()->getIceField(i, j) != nullptr) {
 								delete getStudentWorld()->getIceField(i, j);
 								getStudentWorld()->setIceField(i, j, nullptr);
+								GameController::getInstance().playSound(SOUND_DIG); // play sound
 							}
 						}
 					}
@@ -94,7 +96,8 @@ void iceMan::doSomething() {
 			if (right != getDirection()) { setDirection(right); }
 			if (getX() + 4 == 64) { break; }
 			else {
-				if (getStudentWorld()->checkRadialCollision(getX() + 1, getY(), 3, 4, nullptr)) {
+				Actor* temp = nullptr;
+				if (getStudentWorld()->checkRadialCollision(getX() + 1, getY(), 3, 4, temp)) {
 					break;
 				}
 				moveTo(getX() + 1, getY());
@@ -104,6 +107,7 @@ void iceMan::doSomething() {
 							if (getStudentWorld()->getIceField(i, j) != nullptr) {
 								delete getStudentWorld()->getIceField(i, j);
 								getStudentWorld()->setIceField(i, j, nullptr);
+								GameController::getInstance().playSound(SOUND_DIG); // play sound
 							}
 						}
 					}
@@ -114,7 +118,8 @@ void iceMan::doSomething() {
 			if (up != getDirection()) { setDirection(up); }
 			if (getY() + 4 == 64) { break; }
 			else {
-				if (getStudentWorld()->checkRadialCollision(getX(), getY() + 1, 3, 4, nullptr)) {
+				Actor* temp = nullptr;
+				if (getStudentWorld()->checkRadialCollision(getX(), getY() + 1, 3, 4, temp)) {
 					break;
 				}
 				moveTo(getX(), getY() + 1);
@@ -124,6 +129,7 @@ void iceMan::doSomething() {
 							if (getStudentWorld()->getIceField(i, j) != nullptr) {
 								delete getStudentWorld()->getIceField(i, j);
 								getStudentWorld()->setIceField(i, j, nullptr);
+								GameController::getInstance().playSound(SOUND_DIG); // play sound
 							}
 						}
 					}
@@ -134,7 +140,8 @@ void iceMan::doSomething() {
 			if (down != getDirection()) { setDirection(down); }
 			if (getY() - 1 < 0) { break; }
 			else {
-				if (getStudentWorld()->checkRadialCollision(getX(), getY() - 1, 3, 4, nullptr)) {
+				Actor* temp = nullptr;
+				if (getStudentWorld()->checkRadialCollision(getX(), getY() - 1, 3, 4, temp)) {
 					break;
 				}
 				moveTo(getX(), getY() - 1);
@@ -144,6 +151,7 @@ void iceMan::doSomething() {
 							if (getStudentWorld()->getIceField(i, j) != nullptr) {
 								delete getStudentWorld()->getIceField(i, j);
 								getStudentWorld()->setIceField(i, j, nullptr);
+								GameController::getInstance().playSound(SOUND_DIG); // play sound
 							}
 						}
 					}
@@ -152,36 +160,33 @@ void iceMan::doSomething() {
 			break;
 		case KEY_PRESS_SPACE:	// fire a squirt of water
 			if (waterUnits > 0) {
+				int squirtX = 0;
+				int squirtY = 0;
 				switch (getDirection()) {
-				case down: {
-					Squirt* squirt = new Squirt(3, getX(), getY() - 1, getDirection(), 1, 1);
-					squirt->setStudentWorld(getStudentWorld());
-					getStudentWorld()->addToObjectList(squirt);
-					waterUnits--;
+				case down:
+					squirtX = getX();
+					squirtY = getY() - 4;
+					break;
+				case up:
+					squirtX = getX();
+					squirtY = getY() + 4;
+					break;
+				case left:
+					squirtX = getX() - 4;
+					squirtY = getY();
+					break;
+				case right:
+					squirtX = getX() + 4;
+					squirtY = getY();
 					break;
 				}
-				case up: {
-					Squirt* squirt = new Squirt(3, getX(), getY() + 1, getDirection(), 1, 1);
+				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);  // play sound when used
+				if (squirtX >= 0 && squirtX <= 60 && squirtY >= 0 && squirtY <= 60) {
+					Squirt* squirt = new Squirt(3, squirtX, squirtY, getDirection(), 1, 1);
 					getStudentWorld()->addToObjectList(squirt);
 					squirt->setStudentWorld(getStudentWorld());
-					waterUnits--;
-					break;
 				}
-				case left: {
-					Squirt* squirt = new Squirt(3, getX() - 1, getY(), getDirection(), 1, 1);
-					getStudentWorld()->addToObjectList(squirt);
-					squirt->setStudentWorld(getStudentWorld());
-					waterUnits--;
-					break;
-				}
-				case right: {
-					Squirt* squirt = new Squirt(3, getX() + 1, getY(), getDirection(), 1, 1);
-					getStudentWorld()->addToObjectList(squirt);
-					squirt->setStudentWorld(getStudentWorld());
-					waterUnits--;
-					break;
-				}
-				}
+				waterUnits--;
 			}
 			break;
 		case KEY_PRESS_ESCAPE:	// abort the level
@@ -252,7 +257,7 @@ protestor::protestor(int imageID, int startX, int startY, Direction startDirecti
 	setIDNum(imageID);
 	this->setVisible(true);
 	moveTo(startX, startY);
-	setHealth(5);
+	setHealth(6);
 }
 
 protestor::~protestor() {
@@ -271,21 +276,43 @@ void protestor::doSomething() { //every tick enemy will check location of player
 	int protestorX = getX();
 	int protestorY = getY();
 
-	//if (this->getHealth() == 0) {
-	//	cout << "dead" << endl;
+	//if (getHealth() == 1) {
 	//	protestor::leave_the_oilfield(60, 60);
 	//}
-	if (protestorX = playerX + 3, playerX - 3) {
 
-	}
-	if (protestorY = playerY)
-		for (int i = playerX - 4; i <= playerX + 4; i++) {
-			for (int j = playerY - 3; j < playerY; j++) {
-				//turn direction to Iceman
-				//check for 
-				moveTo(playerX + 3, playerY);
+	//if (protestorX = playerX + 3, playerX - 3) {
+
+	//}
+	//if (protestorY = playerY)
+	//	for (int i = playerX - 4; i <= playerX + 4; i++) {
+	//		for (int j = playerY - 3; j < playerY; j++) {
+	//			//turn direction to Iceman
+	//			//check for 
+	//			moveTo(playerX + 3, playerY);
+	//		}
+	//	}
+	if (getHealth() > 1) {
+		if (protestorX == 60 && protestorY == 60) {
+			setHealth(0);
+		}
+		if (tick <= 3) {
+			Actor* temp = nullptr;
+			getStudentWorld()->checkRadialCollision(protestorX, protestorY, 4, 0, temp);
+			if (temp != nullptr) {
+				cout << "iceman" << endl;
+			}
+			else {
+				cout << "no iceman" << endl;
 			}
 		}
+		else {
+			tick = 0;
+		}
+	}
+	else {
+		protestor::leave_the_oilfield(protestorX, protestorY);
+	}
+	tick++;
 	//get protestors currrent location
 	//
 	//int ticksToWaitBetweenMoves = max(0, 3 – current_level_number / 4);
@@ -362,8 +389,15 @@ void Gold::doSomething() {
 		if (tick == 100) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
 			setHealth(0);
 		}
+		Actor* temp = nullptr;
+		if (getStudentWorld()->checkRadialCollision(getX(), getY(), 1, 1, temp) || getStudentWorld()->checkRadialCollision(getX(), getY(), 1, 2, temp)) { // check if protestor steps on gold nugget
+			GameController::getInstance().playSound(SOUND_PROTESTER_FOUND_GOLD); // play sound
+			getStudentWorld()->increaseScore(25); // Increase score by 25 points
+			temp->setHealth(0);
+			setHealth(0);
+		}
 	}
-	
+
 }
 void Gold::setTemp(bool setting) {
 	tempGold = setting;
@@ -420,10 +454,10 @@ void Boulder::doSomething()
 							temp->setHealth(0);	// reduce the player health to zero
 						}
 						if (temp->getID() == 1) { // if the object is a protestor
-							temp->setHealth(0);	// reduce the protestor health to zero
+							temp->setHealth(1);	// reduce the protestor health to effectly zero
 						}
 						if (temp->getID() == 2) { // if the object is a hardcore protestor
-							temp->setHealth(0);	// reduce the hardcore protestor health to zero
+							temp->setHealth(1);	// reduce the hardcore protestor health to effectively zero
 						}
 					}
 				}
@@ -520,7 +554,7 @@ Squirt::Squirt(int imageID, int startX, int startY, Direction startDirection, fl
 {
 	setIDNum(imageID);
 	this->setVisible(true);
-	setHealth(1);
+	setHealth(10);
 }
 
 Squirt::~Squirt() {
@@ -537,8 +571,6 @@ void Squirt::doSomething() {
 	int yPos = getY();
 	Actor* temp = nullptr;
 
-	GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);  // play sound when used
-
 	for (int i = xPos - 3; i <= xPos + 3; i++) {
 		for (int j = yPos - 3; j <= yPos; j++) {
 			int dx = i - xPos;
@@ -547,7 +579,17 @@ void Squirt::doSomething() {
 				if (i >= 0 && i <= 60 && j >= 0 && j <= 60) {
 					if (getStudentWorld()->checkCollision(i, j, temp)) {
 						if (temp->getID() == 1 || temp->getID() == 2) {
-							temp->setHealth(temp->getHealth() - 2); // damage protestor or hardcore protestor
+							int check = temp->getHealth();
+							if (temp->getHealth() == 2) {
+								temp->setHealth(temp->getHealth() - 1); // damage protestor or hardcore protestor
+								setHealth(0);
+								break;
+							}
+							if (temp->getHealth() > 2) {
+								temp->setHealth(temp->getHealth() - 2); // damage protestor or hardcore protestor
+								setHealth(0);
+								break;
+							}
 						}
 					}
 				}
@@ -585,7 +627,7 @@ void Squirt::doSomething() {
 		}
 		break;
 	case right:
-		if (getStudentWorld()->checkCollision(getX() + 3, getY(), temp)) {
+		if (getStudentWorld()->checkCollision(getX() + 1, getY(), temp)) {
 			setHealth(0);
 		}
 		else {
