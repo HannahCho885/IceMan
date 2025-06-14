@@ -74,6 +74,9 @@ void iceMan::doSomething() {
 			if (left != getDirection()) { setDirection(left); }
 			if (getX() - 1 < 0) { break; }
 			else {
+				if (getStudentWorld()->checkRadialCollision(getX() - 1, getY(), 3, 4, nullptr)) {
+					break;
+				}
 				moveTo(getX() - 1, getY());
 				for (int i = getX(); i < getX() + 4; i++) {
 					for (int j = getY(); j < getY() + 4; j++) {
@@ -91,6 +94,9 @@ void iceMan::doSomething() {
 			if (right != getDirection()) { setDirection(right); }
 			if (getX() + 4 == 64) { break; }
 			else {
+				if (getStudentWorld()->checkRadialCollision(getX() + 1, getY(), 3, 4, nullptr)) {
+					break;
+				}
 				moveTo(getX() + 1, getY());
 				for (int i = getX(); i < getX() + 4; i++) {
 					for (int j = getY(); j < getY() + 4; j++) {
@@ -108,6 +114,9 @@ void iceMan::doSomething() {
 			if (up != getDirection()) { setDirection(up); }
 			if (getY() + 4 == 64) { break; }
 			else {
+				if (getStudentWorld()->checkRadialCollision(getX(), getY() + 1, 3, 4, nullptr)) {
+					break;
+				}
 				moveTo(getX(), getY() + 1);
 				for (int i = getX(); i < getX() + 4; i++) {
 					for (int j = getY(); j < getY() + 4; j++) {
@@ -125,6 +134,9 @@ void iceMan::doSomething() {
 			if (down != getDirection()) { setDirection(down); }
 			if (getY() - 1 < 0) { break; }
 			else {
+				if (getStudentWorld()->checkRadialCollision(getX(), getY() - 1, 3, 4, nullptr)) {
+					break;
+				}
 				moveTo(getX(), getY() - 1);
 				for (int i = getX(); i < getX() + 4; i++) {
 					for (int j = getY(); j > getY() - 1; j--) {
@@ -189,6 +201,20 @@ void iceMan::doSomething() {
 				}
 			}
 			break;
+		case 'Z':	// use sonar kit
+			if (sonarUnits > 0) {
+				sonarUnits--;
+				Actor* temp = nullptr;
+				getStudentWorld()->checkRadialCollision(getX(), getY(), 12, 5, temp);	// check for nearby Oil
+				if (temp != nullptr) {
+					temp->setVisible(true);
+				}
+				getStudentWorld()->checkRadialCollision(getX(), getY(), 12, 7, temp);	// check for nearby Gold
+				if (temp != nullptr) {
+					temp->setVisible(true);
+				}
+			}
+			break;
 		case KEY_PRESS_TAB:	// place gold nugget on map
 			if (getStudentWorld()->getGold() > 0) {
 				Gold* goldNugget = new Gold(7, getX(), getY(), getDirection(), 1, 2);
@@ -218,6 +244,51 @@ void iceMan::addWater() {
 
 void iceMan::addSonar() {
 	sonarUnits = sonarUnits + 2;
+}
+
+//Protestor Logic
+protestor::protestor(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth) :
+	Actor(imageID, startX, startY, startDirection, size, depth) {
+	setIDNum(imageID);
+	this->setVisible(true);
+	moveTo(startX, startY);
+	setHealth(5);
+}
+
+protestor::~protestor() {
+
+}
+
+void protestor::leave_the_oilfield(int x, int y) {
+	moveTo(x, y);
+	this->setHealth(0);
+}
+
+void protestor::doSomething() { //every tick enemy will check location of player and follow 
+	int playerX = getStudentWorld()->getPlayer()->getX();
+	int playerY = getStudentWorld()->getPlayer()->getY();
+
+	int protestorX = getX();
+	int protestorY = getY();
+
+	//if (this->getHealth() == 0) {
+	//	cout << "dead" << endl;
+	//	protestor::leave_the_oilfield(60, 60);
+	//}
+	if (protestorX = playerX + 3, playerX - 3) {
+
+	}
+	if (protestorY = playerY)
+		for (int i = playerX - 4; i <= playerX + 4; i++) {
+			for (int j = playerY - 3; j < playerY; j++) {
+				//turn direction to Iceman
+				//check for 
+				moveTo(playerX + 3, playerY);
+			}
+		}
+	//get protestors currrent location
+	//
+	//int ticksToWaitBetweenMoves = max(0, 3 – current_level_number / 4);
 }
 
 Oil::Oil(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
@@ -358,6 +429,7 @@ void Boulder::doSomething()
 				}
 			}
 			moveTo(xPos, yPos - 1);  // move Boulder one square down
+			fallTimer++;
 		}
 		else {
 			fallTimer++;
