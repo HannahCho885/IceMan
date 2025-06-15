@@ -41,6 +41,13 @@ StudentWorld* Actor::getStudentWorld() const {
 	return studentWorld; // return the pointer to StudentWorld
 }
 
+bool Actor::getDeath() {
+	return isDead;
+}
+void Actor::setDeath(bool set) {
+	isDead = set;
+}
+
 Ice::Ice(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
 	: Actor(imageID, startX, startY, startDirection, size, depth) {
 	setIDNum(imageID);
@@ -182,15 +189,19 @@ void iceMan::doSomething() {
 				}
 				GameController::getInstance().playSound(SOUND_PLAYER_SQUIRT);  // play sound when used
 				if (squirtX >= 0 && squirtX <= 60 && squirtY >= 0 && squirtY <= 60) {
-					Squirt* squirt = new Squirt(3, squirtX, squirtY, getDirection(), 1, 1);
-					getStudentWorld()->addToObjectList(squirt);
-					squirt->setStudentWorld(getStudentWorld());
+					Actor* temp = nullptr;
+					if (!getStudentWorld()->checkRadialCollision(squirtX, squirtY, 3, 4, temp) && !getStudentWorld()->checkRadialCollision(squirtX, squirtY, 0, 6, temp)) {
+						Squirt* squirt = new Squirt(3, squirtX, squirtY, getDirection(), 1, 1);
+						getStudentWorld()->addToObjectList(squirt);
+						squirt->setStudentWorld(getStudentWorld());
+					}
 				}
 				waterUnits--;
 			}
 			break;
 		case KEY_PRESS_ESCAPE:	// abort the level
 			setHealth(0);
+			setDeath(true);
 			break;
 		case 'z':	// use sonar kit
 			if (sonarUnits > 0) {
@@ -257,7 +268,7 @@ protestor::protestor(int imageID, int startX, int startY, Direction startDirecti
 	setIDNum(imageID);
 	this->setVisible(true);
 	moveTo(startX, startY);
-	setHealth(6);
+	setHealth(5);
 }
 
 protestor::~protestor() {
@@ -267,6 +278,7 @@ protestor::~protestor() {
 void protestor::leave_the_oilfield(int x, int y) {
 	moveTo(x, y);
 	this->setHealth(0);
+	setDeath(true);
 }
 
 void protestor::doSomething() { //every tick enemy will check location of player and follow 
@@ -291,18 +303,17 @@ void protestor::doSomething() { //every tick enemy will check location of player
 	//			moveTo(playerX + 3, playerY);
 	//		}
 	//	}
-	if (getHealth() > 1) {
+	if (getHealth() > 0) {
 		if (protestorX == 60 && protestorY == 60) {
 			setHealth(0);
+			setDeath(true);
 		}
 		if (tick <= 3) {
 			Actor* temp = nullptr;
 			getStudentWorld()->checkRadialCollision(protestorX, protestorY, 4, 0, temp);
 			if (temp != nullptr) {
-				cout << "iceman" << endl;
 			}
 			else {
-				cout << "no iceman" << endl;
 			}
 		}
 		else {
@@ -344,6 +355,7 @@ void Oil::doSomething() {
 
 	if ((dx * dx + dy * dy) <= 9) { // if oil is <= 3 units away from player
 		this->setHealth(0); // prep for object death
+		setDeath(true);
 		GameController::getInstance().playSound(SOUND_FOUND_OIL); // play sound
 		getStudentWorld()->increaseScore(1000); // Increase score by 1000 points
 		getStudentWorld()->incrementOil(); // Inform the StudentWorld object that it was picked up
@@ -379,6 +391,7 @@ void Gold::doSomething() {
 
 		if ((dx * dx + dy * dy) <= 9) { // if gold is <= 3 units away from player
 			this->setHealth(0); // prep for object death
+			setDeath(true);
 			GameController::getInstance().playSound(SOUND_GOT_GOODIE); // play sound
 			getStudentWorld()->increaseScore(10); // Increase score by 10 points
 			getStudentWorld()->incrementGold(); // Inform the StudentWorld object that it was picked up
@@ -388,6 +401,7 @@ void Gold::doSomething() {
 		tick++;
 		if (tick == 100) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
 			setHealth(0);
+			setDeath(true);
 		}
 		Actor* temp = nullptr;
 		if (getStudentWorld()->checkRadialCollision(getX(), getY(), 1, 1, temp) || getStudentWorld()->checkRadialCollision(getX(), getY(), 1, 2, temp)) { // check if protestor steps on gold nugget
@@ -395,6 +409,7 @@ void Gold::doSomething() {
 			getStudentWorld()->increaseScore(25); // Increase score by 25 points
 			temp->setHealth(0);
 			setHealth(0);
+			setDeath(true);
 		}
 	}
 
@@ -436,32 +451,33 @@ void Boulder::doSomething()
 			Actor* temp = nullptr;
 			if (yPos == 0) { // if the boulder is at the bottom of the map
 				setHealth(0);   // kill boulder
+				setDeath(true);
 				fallTimer = 0;
 				falling = false;
 			}
 
-			for (int i = xPos - 3; i <= xPos + 3; i++) { // check within 3 units of the boulder
-				for (int j = yPos - 3; j < yPos; j++) {
+			for (int i = xPos; i <= xPos + 3; i++) { // check within 3 units of the boulder
+				for (int j = yPos - 1; j < yPos; j++) {
 					if (getStudentWorld()->checkCollision(i, j, temp)) { // if the boulder hits an object
-						if (i == xPos) {
-							if (temp->getID() == 6 || temp->getID() == 4) { // if the object is ice or a boulder
-								setHealth(0);   // kill boulder
-								fallTimer = 0;
-								falling = false;
-							}
-						}
-						if (temp->getID() == 0) { // if the object is the player
-							temp->setHealth(0);	// reduce the player health to zero
-						}
-						if (temp->getID() == 1) { // if the object is a protestor
-							temp->setHealth(1);	// reduce the protestor health to effectly zero
-						}
-						if (temp->getID() == 2) { // if the object is a hardcore protestor
-							temp->setHealth(1);	// reduce the hardcore protestor health to effectively zero
+						if (temp->getID() == 6 || temp->getID() == 4) { // if the object is ice or a boulder
+							setHealth(0);   // kill boulder
+							setDeath(true);
+							fallTimer = 0;
+							falling = false;
 						}
 					}
 				}
 			}
+			//check of boulder falls on a protestor
+			if (getStudentWorld()->checkRadialCollision(getX(), getY(), 3, 1, temp) || getStudentWorld()->checkRadialCollision(getX(), getY(), 3, 2, temp)) {
+				temp->setDeath(true);	// reduce the protestor health to effectly zero
+			}
+			//check if boulder falls on player
+			if (getStudentWorld()->checkRadialCollision(getX(), getY(), 3, 0, temp)) {
+				temp->setHealth(0);	// reduce the player health to zero
+				temp->setDeath(true);
+			}
+			getStudentWorld()->checkRadialCollision(getX(), getY(), 3, 1, temp);
 			moveTo(xPos, yPos - 1);  // move Boulder one square down
 			fallTimer++;
 		}
@@ -511,6 +527,7 @@ void Sonar::doSomething() {
 	tick++;
 	if (tick >= maxNumSonar) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
 		setHealth(0);
+		setDeath(true);
 	}
 }
 
@@ -539,6 +556,7 @@ void Water::doSomething() {
 
 	if ((dx * dx + dy * dy) <= 9) { // if water is <= 3 units away from player
 		setHealth(0);
+		setDeath(true);
 		GameController::getInstance().playSound(SOUND_GOT_GOODIE);  // play sound when picked up
 		getStudentWorld()->getPlayer()->addWater(); // tell the Iceman object that it just received 5 water squirts
 		getStudentWorld()->increaseScore(100); // increase score by 100 points
@@ -547,6 +565,7 @@ void Water::doSomething() {
 	tick++;
 	if (tick >= maxNumWater) { // check to see if its tick lifetime has elapsed, and if so, set its state to dead
 		setHealth(0);
+		setDeath(true);
 	}
 }
 Squirt::Squirt(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)
@@ -579,17 +598,15 @@ void Squirt::doSomething() {
 				if (i >= 0 && i <= 60 && j >= 0 && j <= 60) {
 					if (getStudentWorld()->checkCollision(i, j, temp)) {
 						if (temp->getID() == 1 || temp->getID() == 2) {
-							int check = temp->getHealth();
-							if (temp->getHealth() == 2) {
+							if (temp->getHealth() == 1) {
 								temp->setHealth(temp->getHealth() - 1); // damage protestor or hardcore protestor
-								setHealth(0);
-								break;
 							}
-							if (temp->getHealth() > 2) {
+							if (temp->getHealth() >= 2) {
 								temp->setHealth(temp->getHealth() - 2); // damage protestor or hardcore protestor
-								setHealth(0);
-								break;
 							}
+							setHealth(0);
+							setDeath(true);
+							break;
 						}
 					}
 				}
@@ -598,6 +615,7 @@ void Squirt::doSomething() {
 	}
 	if (distance == 4) { // if squirt traveled full distance, kill it
 		setHealth(0);
+		setDeath(true);
 		return;
 	}
 
@@ -605,6 +623,7 @@ void Squirt::doSomething() {
 	case up:
 		if (getStudentWorld()->checkCollision(getX(), getY() + 1, temp)) {
 			setHealth(0);
+			setDeath(true);
 		}
 		else {
 			moveTo(xPos, yPos + 1);  // move squirt one square up
@@ -613,6 +632,7 @@ void Squirt::doSomething() {
 	case down:
 		if (getStudentWorld()->checkCollision(getX(), getY() - 1, temp)) {
 			setHealth(0);
+			setDeath(true);
 		}
 		else {
 			moveTo(xPos, yPos - 1);  // move squirt one square down
@@ -621,6 +641,7 @@ void Squirt::doSomething() {
 	case left:
 		if (getStudentWorld()->checkCollision(getX() - 1, getY(), temp)) {
 			setHealth(0);
+			setDeath(true);
 		}
 		else {
 			moveTo(xPos - 1, yPos);  // move squirt one square left
@@ -629,6 +650,7 @@ void Squirt::doSomething() {
 	case right:
 		if (getStudentWorld()->checkCollision(getX() + 1, getY(), temp)) {
 			setHealth(0);
+			setDeath(true);
 		}
 		else {
 			moveTo(xPos + 1, yPos);  // move squirt one square right

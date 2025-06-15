@@ -30,11 +30,16 @@ public:
 	
 	void setStudentWorld(StudentWorld* studentWorld);
 
+	bool getDeath();
+
+	void setDeath(bool set);
+
 private:
 	StudentWorld* studentWorld = nullptr; // pointer to StudentWorld
     int imageIDNum = 0;
     int health = 0;
 	int annoyance = 0;
+	bool isDead = false;
 
 };
 
@@ -88,7 +93,7 @@ public:
 	int numSquaresToMoveInCurrentDirection();
 
 private:
-	int health = 6;
+	int health = 5;
 	int tick = 0;
 };
 

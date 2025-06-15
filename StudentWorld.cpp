@@ -143,7 +143,7 @@ int StudentWorld::move() {
 
 	for (int i = 0; i < objectList.size(); i++) { // delete dead game objects
 		if (objectList[i] != nullptr) {
-			if (objectList[i]->getHealth() == 0) {
+			if (objectList[i]->getHealth() == 0 && objectList[i]->getDeath() == true) {
 				delete objectList[i];
 				objectList[i] = nullptr;
 			}
