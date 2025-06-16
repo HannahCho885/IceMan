@@ -26,9 +26,13 @@ int StudentWorld::init() {
 	player = new iceMan(0, 30, 60, dirLeft, 1.0, 0);	// generate new player object
 	player->setStudentWorld(this);
 	
-	enemy = new protestor(1, 59, 60, dirLeft, 1.0, 0); 	//generate new protestor object
-	enemy->setStudentWorld(this);
-	objectList.push_back(enemy);
+	//enemy = new protestor(1, 59, 60, dirLeft, 1.0, 0); 	//generate new protestor object
+	//enemy->setStudentWorld(this);
+	//objectList.push_back(enemy);
+
+	hardcoreEnemy = new hardcoreProtestor(2, 59, 60, dirLeft, 1.0, 0); 	//generate new protestor object
+	hardcoreEnemy->setStudentWorld(this);
+	objectList.push_back(hardcoreEnemy);
 
 	for (int i = 0; i < 64; i++) { 	// initialize the ice map to nullptr to prevent read errors
 		for (int j = 0; j < 60; j++) {

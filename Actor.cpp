@@ -269,6 +269,7 @@ protestor::protestor(int imageID, int startX, int startY, Direction startDirecti
 	this->setVisible(true);
 	moveTo(startX, startY);
 	setHealth(5);
+
 }
 
 protestor::~protestor() {
@@ -327,6 +328,126 @@ void protestor::doSomething() { //every tick enemy will check location of player
 	//get protestors currrent location
 	//
 	//int ticksToWaitBetweenMoves = max(0, 3 – current_level_number / 4);
+}
+
+//Hardcore Protestor Logic
+hardcoreProtestor::hardcoreProtestor(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth) :
+	protestor(imageID, startX, startY, startDirection, size, depth) {
+	setIDNum(imageID);
+	this->setVisible(true);
+	moveTo(startX, startY);
+	setHealth(20);
+	
+}
+
+hardcoreProtestor::~hardcoreProtestor() {
+
+}
+
+void hardcoreProtestor::leave_the_oilfield(int x, int y) {
+	moveTo(x, y);
+	this->setHealth(0);
+	setDeath(true);
+}
+
+void hardcoreProtestor::doSomething() { //every tick enemy will check location of player and follow 
+	//int playerX = getStudentWorld()->getPlayer()->getX();
+	//int playerY = getStudentWorld()->getPlayer()->getY();
+
+	//int protestorX = getX();
+	//int protestorY = getY();
+
+	tick++;
+
+	maxTickWait = 3 - getStudentWorld()->getLevel() / 4;
+	ticksToWaitBetweenMoves = std::max(0, maxTickWait);
+
+
+	if (getHealth() == 0 && getDeath()== true) { // do nothing if dead
+		return;
+	}
+
+	if (getHealth() == 0 && getX() == 60 && getY() == 60) { // if at 0 hp and at exit point, set death to true
+		setDeath(true);
+	}
+
+	if (getHealth() == 0) {
+		moveTo(60, 60);
+	}
+
+	if (tick % ticksToWaitBetweenMoves == 0) {
+		Actor* temp = nullptr;
+		if (getStudentWorld()->checkRadialCollision(getX(), getY(), 4, 0, temp) && canYell == true && isFacingIceMan()) {
+			GameController::getInstance().playSound(SOUND_PROTESTER_YELL); // play sound
+			temp->setHealth(temp->getHealth()-2);	// injure the player by 2 hp
+			canYell = false;
+			tick++;
+			return;
+		}
+		if (!getStudentWorld()->checkRadialCollision(getX(), getY(), 4, 0, temp)) {	// if the player isnt within a range of 4
+			moves = 16 + getStudentWorld()->getLevel() * 2;	// calculate total moves to make
+			int timesMoved = 0;
+			while (timesMoved < moves) {
+				if (getY() == getStudentWorld()->getPlayer()->getY()) {	// if the HCP is on the same y axis as the player
+					if (getX() < getStudentWorld()->getPlayer()->getX()) { // if the HCP is to the left of the player
+						if (!getStudentWorld()->checkCollision(getX() + 1, getY(), temp)) {	// as long as there is nothing to the right of HCP
+							setDirection(right);
+							moveTo(getX() + 1, getY());	// move right
+							tick++;
+							return;
+						}
+					}
+					else if (getX() > getStudentWorld()->getPlayer()->getX()) { // if the HCP is to the right of the player
+						if (!getStudentWorld()->checkCollision(getX() + 1, getY(), temp)) { // as long as there is nothing to the left of HCP
+							setDirection(left);
+							moveTo(getX() - 1, getY()); // move left
+							tick++;
+							return;
+						}
+					}
+				}
+				else if (getX() == getStudentWorld()->getPlayer()->getX()) { // if the HCP is on the same x axis as the player
+					if (getY() < getStudentWorld()->getPlayer()->getY()) { // if the HCP is under the player
+						if (!getStudentWorld()->checkCollision(getX(), getY() + 1, temp)) {	// as long as there is nothing above HCP
+							setDirection(up);
+							moveTo(getX(), getY() + 1);	// move up
+							tick++;
+							return;
+						}
+					}
+					else if (getY() > getStudentWorld()->getPlayer()->getY()) { // if the HCP is above the player
+						if (!getStudentWorld()->checkCollision(getX(), getY() - 1, temp)) { // as long as there is nothing below HCP
+							setDirection(down);
+							moveTo(getX(), getY() - 1); // move down
+							tick++;
+							return;
+						}
+					}
+				}
+				timesMoved++;
+			}
+			
+		}
+	}
+	if (tick % (ticksToWaitBetweenMoves * 15) == 0 && canYell == false) {
+		canYell = true;
+	}
+}
+
+bool hardcoreProtestor::isFacingIceMan() {
+	if (getX() > getStudentWorld()->getPlayer()->getX() && getDirection() == left && getY() == getStudentWorld()->getPlayer()->getY()) {
+		return true;
+	}
+	if (getX() < getStudentWorld()->getPlayer()->getX() && getDirection() == right && getY() == getStudentWorld()->getPlayer()->getY()) {
+		return true;
+	}
+	if (getY() < getStudentWorld()->getPlayer()->getY() && getDirection() == up && getX() == getStudentWorld()->getPlayer()->getX()) {
+		return true;
+	}
+	if (getY() > getStudentWorld()->getPlayer()->getY() && getDirection() == down && getX() == getStudentWorld()->getPlayer()->getX()) {
+		return true;
+	}
+	return false;
 }
 
 Oil::Oil(int imageID, int startX, int startY, Direction startDirection, float size, unsigned int depth)

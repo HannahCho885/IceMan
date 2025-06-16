@@ -27,6 +27,7 @@ private:
 	int numOilBarrels = 0;
 	int oilBarrelsCollected = 0;
 	protestor* enemy;
+	hardcoreProtestor* hardcoreEnemy;
 	iceMan* player;
 	Ice* ice[64][60];
 	vector<Actor*> objectList;
