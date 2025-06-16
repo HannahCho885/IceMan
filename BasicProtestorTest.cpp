@@ -280,7 +280,8 @@ void protestor::leave_the_oilfield() {
 	int startLocationY = getY();
 
 	if (startLocationX == 60 && startLocationY == 60) {
-		setHealth(0);
+		setDeath(true);
+		this->setVisible(false);
 	}
 	else {
 		moveTo(60, 60);
@@ -337,6 +338,7 @@ void protestor::doSomething() { //every tick enemy will check location of player
 
 	Direction dir = Direction(rand() % 4);
 
+
 	if (tick % 4 >= 0) {
 		if (getHealth() > 0) {
 		}
@@ -367,38 +369,46 @@ void protestor::doSomething() { //every tick enemy will check location of player
 			if (temp != nullptr) { setDirection(dir); } //if its a boulder, then switch to a different direction
 
 			if (getDirection() == right) {
-				if (protestorX == 60) { setDirection(dir); }
+				if (protestorX + 8 >= 58) { setDirection(dir); }
 				else {
-					moveTo(protestorX + 1, protestorY);
-					cout << "moving right" << endl;
+					for (int i = 0; i < 8; i++) {
+						moveTo(protestorX + 1, protestorY);
+						cout << "moving right" << endl;
+					}
 				}
-				setDirection(dir);
+				setDirection(left);
 			}
 			if (getDirection() == left) {
-				if (protestorX == 0) { setDirection(dir); }
+				if (protestorX - 8 <= 2) { setDirection(dir); }
 				else {
-					moveTo(protestorX -1, protestorY);
-					cout << "moving left" << endl;
+					for (int i = 0; i < 8; i++) {
+						moveTo(protestorX - 1, protestorY);
+						cout << "moving left" << endl;
+					}
 				}
-				setDirection(dir);
 			}
+			setDirection(dir);
+		}
 			if (getDirection() == up) {
-				if (protestorY == 60) { setDirection(dir); }
+				if (protestorY + 8 >= 59) { setDirection(dir); }
 				else {
-					moveTo(protestorX, protestorY + 1);
-					cout << "moving up" << endl;
+					for (int i = 0; i < 8; i++) {
+						moveTo(protestorY + 1, protestorY);
+						cout << "moving up" << endl;
+					}
 				}
 				setDirection(dir);
 			}
 			if (getDirection() == down) {
-				if (protestorY == 0) { setDirection(dir); } //if reach edge of map then switch direction
+				if (protestorY - 8 <= 1) { setDirection(dir); }
 				else {
-					moveTo(protestorX, protestorY - 1);
-					cout << "moving down" << endl;
+					for (int i = 0; i < 8; i++) {
+						moveTo(protestorY - 1, protestorY);
+						cout << "moving down" << endl;
+					}
 				}
 				setDirection(dir);
 			}
-		}
 	}
 	tick++;
 }
