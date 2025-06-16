@@ -280,6 +280,7 @@ void protestor::leave_the_oilfield() {
 	int startLocationY = getY();
 
 	if (startLocationX == 60 && startLocationY == 60) {
+		setHealth(0);
 		setDeath(true);
 		this->setVisible(false);
 	}
