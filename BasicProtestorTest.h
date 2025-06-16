@@ -30,11 +30,16 @@ public:
 
 	void setStudentWorld(StudentWorld* studentWorld);
 
+	bool getDeath();
+
+	void setDeath(bool set);
+
 private:
 	StudentWorld* studentWorld = nullptr; // pointer to StudentWorld
 	int imageIDNum = 0;
 	int health = 0;
 	int annoyance = 0;
+	bool isDead = false;
 
 };
 
@@ -83,15 +88,41 @@ public:
 
 	void doSomething();
 
-	void leave_the_oilfield(int x,int y);
+	void leave_the_oilfield();
+
+	bool facingTowardIceMan();
+
+private:
+	int health = 6;
+	int tick = 0;
+	int ticksToWaitBetweenMoves = 0;
+	bool canYell = true;
+};
+
+class hardcoreProtestor : public protestor
+{
+public:
+	hardcoreProtestor(int imageID, int startX, int startY, Direction startDirection, float size = 1.0f, unsigned int depth = 0);
+
+	~hardcoreProtestor();
+
+	void doSomething();
+
+	void leave_the_oilfield(int x, int y);
 
 	int numSquaresToMoveInCurrentDirection();
 
+	bool isFacingIceMan();
+
 private:
-	int health = 3;
+	int health = 5;
+	int tick = 0;
+	int maxTickWait = 0;
+	int ticksToWaitBetweenMoves = 0;
+	bool canYell = true;
+	int moves = 0;
+
 };
-
-
 class Oil : public Actor
 {
 public:
