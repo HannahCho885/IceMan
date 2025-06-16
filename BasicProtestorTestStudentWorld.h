@@ -26,8 +26,9 @@ private:
 	int goldNuggetsCollected = 0;
 	int numOilBarrels = 0;
 	int oilBarrelsCollected = 0;
-	iceMan* player;
 	protestor* enemy;
+	hardcoreProtestor* hardcoreEnemy;
+	iceMan* player;
 	Ice* ice[64][60];
 	vector<Actor*> objectList;
 
@@ -60,8 +61,6 @@ public:
 
 	iceMan* getPlayer();
 
-	protestor* getEnemy();
-
 	Ice* getIceField(int x, int y);
 
 	void setIceField(int x, int y, Ice* temp);
@@ -72,7 +71,7 @@ public:
 
 	bool checkCollision(int x, int y, Actor*& object);
 
-	bool checkRadialCollision(int x, int y, int range, int targetID, Actor* objectHit);
+	bool checkRadialCollision(int x, int y, int range, int targetID, Actor*& objectHit);
 };
 
 #endif // STUDENTWORLD_H_
