@@ -342,54 +342,49 @@ void protestor::doSomething() { //every tick enemy will check location of player
 
 	if (tick % 4 >= 0) {
 		if (getHealth() > 0) {
-		}
-		else {
-			GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
-			protestor::leave_the_oilfield();
-		}
-		if (protestorX == 60 && protestorY == 60) {
-			protestor::leave_the_oilfield();
-		}
-		if (tick % 4 == 0) {
-			Actor* temp = nullptr;
-			getStudentWorld()->checkRadialCollision(protestorX, protestorY, 4, 0, temp); //check for iceMan
-			if (temp != nullptr) {
-				if (canYell == true) { //if 15 ticks pass through
-					if (facingTowardIceMan() == true) { //if facing the direction of Iceman, then yell
-						GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
-						int i = getStudentWorld()->getPlayer()->getHealth();
-						getStudentWorld()->getPlayer()->setHealth(i - 2);
-						canYell = false;
+			if (protestorX == 60 && protestorY == 60) {
+				protestor::leave_the_oilfield();
+			}
+			if (tick % 4 == 0) {
+				Actor* temp = nullptr;
+				getStudentWorld()->checkRadialCollision(protestorX, protestorY, 4, 0, temp); //check for iceMan
+				if (temp != nullptr) {
+					if (canYell == true) { //if 15 ticks pass through
+						if (facingTowardIceMan() == true) { //if facing the direction of Iceman, then yell
+							GameController::getInstance().playSound(SOUND_PROTESTER_YELL);
+							int i = getStudentWorld()->getPlayer()->getHealth();
+							getStudentWorld()->getPlayer()->setHealth(i - 2);
+							canYell = false;
+						}
+					}
+					if (tick % 15 == 0) {
+						canYell = true;
 					}
 				}
-				if (tick % 15 == 0) {
-					canYell = true;
-				}
-			}
-			getStudentWorld()->checkRadialCollision(protestorX, protestorY, 3, 4, temp); //check for boulders
-			if (temp != nullptr) { setDirection(dir); } //if its a boulder, then switch to a different direction
+				getStudentWorld()->checkRadialCollision(protestorX, protestorY, 3, 4, temp); //check for boulders
+				if (temp != nullptr) { setDirection(dir); } //if its a boulder, then switch to a different direction
 
-			if (getDirection() == right) {
-				if (protestorX + 8 >= 58) { setDirection(dir); }
-				else {
-					for (int i = 0; i < 8; i++) {
-						moveTo(protestorX + 1, protestorY);
-						cout << "moving right" << endl;
+				if (getDirection() == right) {
+					if (protestorX + 8 >= 58) { setDirection(dir); }
+					else {
+						for (int i = 0; i < 8; i++) {
+							moveTo(protestorX + 1, protestorY);
+							cout << "moving right" << endl;
+						}
+					}
+					setDirection(left);
+				}
+				if (getDirection() == left) {
+					if (protestorX - 8 <= 2) { setDirection(dir); }
+					else {
+						for (int i = 0; i < 8; i++) {
+							moveTo(protestorX - 1, protestorY);
+							cout << "moving left" << endl;
+						}
 					}
 				}
-				setDirection(left);
+				setDirection(dir);
 			}
-			if (getDirection() == left) {
-				if (protestorX - 8 <= 2) { setDirection(dir); }
-				else {
-					for (int i = 0; i < 8; i++) {
-						moveTo(protestorX - 1, protestorY);
-						cout << "moving left" << endl;
-					}
-				}
-			}
-			setDirection(dir);
-		}
 			if (getDirection() == up) {
 				if (protestorY + 8 >= 59) { setDirection(dir); }
 				else {
@@ -410,7 +405,13 @@ void protestor::doSomething() { //every tick enemy will check location of player
 				}
 				setDirection(dir);
 			}
-	}
+		}
+		}
+		else {
+			GameController::getInstance().playSound(SOUND_PROTESTER_GIVE_UP);
+			protestor::leave_the_oilfield();
+		}
+
 	tick++;
 }
 	
